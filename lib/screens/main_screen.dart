@@ -15,13 +15,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    HomeScreen(),
-    const TrackingScreen(),
-    const NotificationParentScreen(),
-    const AccountScreen(),
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -30,6 +23,13 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _screens = [
+      HomeScreen(onSeeMoreNotifications: () => _onItemTapped(2)),
+      const TrackingScreen(),
+      const NotificationScreen(),
+      const AccountScreen(),
+    ];
+
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: CustomBottomNavigationBar(
