@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Notification;
+import 'package:codeminds_mobile_application/features/notification/data/remote/notification_service.dart';
+import 'package:codeminds_mobile_application/features/notification/data/repository/notification_repository.dart';
+import 'package:codeminds_mobile_application/features/notification/domain/notification.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final String name;
-  final List<String> children = ['Alice', 'Bob', 'Charlie'];
   final VoidCallback onSeeMoreNotifications;
 
   HomeScreen({
@@ -10,6 +12,33 @@ class HomeScreen extends StatelessWidget {
     this.name = "Default Name",
     required this.onSeeMoreNotifications,
   });
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<String> children = ['Alice', 'Bob', 'Charlie'];
+
+  List<Notification> _notifications = [];
+
+  int id = 1;
+
+  Future<void> _loadData() async {
+    List<Notification> notifications = await NotificationRepository(
+      notificationService: NotificationService(),
+    ).getNotificationsByUserId(id);
+
+    setState(() {
+      _notifications = notifications;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +63,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Welcome again!\n$name',
+                        'Welcome again!\n${widget.name}',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -115,7 +144,8 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: onSeeMoreNotifications, // 👈 Llama al callback
+                      onPressed:
+                          widget.onSeeMoreNotifications, // 👈 Llama al callback
                       child: const Text('See More'),
                     ),
                   ],
@@ -123,41 +153,27 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black26),
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.white,
-                      ),
-                      child: const Text(
-                        'Carlos Pérez arrived at destiny. 8:30am',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black26),
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.white,
-                      ),
-                      child: const Text(
-                        'Carlos Pérez entered the vehicle. 7:50am',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ],
+                  children: _notifications.isEmpty
+                      ? [const Center(child: CircularProgressIndicator())]
+                      : _notifications.take(2).map((notification) {
+                          return Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black26),
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white,
+                            ),
+                            child: Text(
+                              notification.message,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          );
+                        }).toList(),
                 ),
                 const SizedBox(height: 20),
               ],
