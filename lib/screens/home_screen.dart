@@ -22,7 +22,6 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo y texto de bienvenida
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
