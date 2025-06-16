@@ -4,11 +4,11 @@ import 'package:latlong2/latlong.dart';
 
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
-// import 'package:codeminds_mobile_application/screens/past_trips_screen.dart';
-// import 'package:codeminds_mobile_application/screens/attendance_screen.dart';
-// import 'package:codeminds_mobile_application/screens/map_screen.dart';
+//import 'package:codeminds_mobile_application/screens/past_trips_screen.dart';
+//import 'package:codeminds_mobile_application/screens/attendance_screen.dart';
+//import 'package:codeminds_mobile_application/screens/map_screen.dart';
 
-import '../widgets/custom_bottom_navigation_bar_Driver.dart';
+import '../widgets/custom_bottom_navigation_bar_Driver.dart'; // si hay
 
 
 class HomeDriverScreen extends StatefulWidget {
@@ -37,16 +37,16 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
         );
         break;
       case 1:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const MapScreen()),
-        // );
+        //Navigator.pushReplacement(
+          //context,
+          //MaterialPageRoute(builder: (context) => const MapScreen()),
+       // );
         break;
       case 2:
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const NotificationScreen()),
-        // );
+        //Navigator.pushReplacement(
+          //context,
+          //MaterialPageRoute(builder: (context) => const NotificationScreen()),
+        //);
         break;
       case 3:
         Navigator.pushReplacement(
@@ -127,10 +127,10 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                         const SizedBox(height: 10),
                         GestureDetector(
                           onTap: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(builder: (_) => const PastTripsScreen()),
-                            // );
+                            //Navigator.push(
+                              //context,
+                              //MaterialPageRoute(builder: (_) => const PastTripsScreen()),
+                            //);
                           },
                           child: Image.asset(
                             'assets/images/PastTrips.png',
@@ -150,10 +150,10 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                         const SizedBox(height: 10),
                         GestureDetector(
                           onTap: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(builder: (_) => const AttendanceScreen()),
-                            // );
+                            //Navigator.push(
+                              //context,
+                              //MaterialPageRoute(builder: (_) => const AttendanceScreen()),
+                            //);
                           },
                           child: Image.asset(
                             'assets/images/Attendace.png',

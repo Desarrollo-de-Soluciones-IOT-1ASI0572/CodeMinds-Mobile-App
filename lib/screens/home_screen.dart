@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart' hide Notification;
-// import 'package:codeminds_mobile_application/features/notification/data/remote/notification_service.dart';
-// import 'package:codeminds_mobile_application/features/notification/data/repository/notification_repository.dart';
-// import 'package:codeminds_mobile_application/features/notification/domain/notification.dart';
-// import 'package:codeminds_mobile_application/screens/children_screen.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+//import 'package:codeminds_mobile_application/features/notification/data/remote/notification_service.dart';
+//import 'package:codeminds_mobile_application/features/notification/data/repository/notification_repository.dart';
+//import 'package:codeminds_mobile_application/features/notification/domain/notification.dart';
+//import 'package:codeminds_mobile_application/screens/children_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String name;
@@ -20,16 +22,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> children = ['Alice', 'Bob', 'Charlie'];
-  // List<Notification> _notifications = [];
+  //List<Notification> _notifications = [];
   int id = 1;
 
   Future<void> _loadData() async {
-    // List<Notification> notifications = await NotificationRepository(
-    //   notificationService: NotificationService(),
-    // ).getNotificationsByUserId(id);
+    //List<Notification> notifications = await NotificationRepository(
+      //notificationService: NotificationService(),
+    //).getNotificationsByUserId(id);
 
     setState(() {
-      // _notifications = notifications;
+      //_notifications = notifications;
     });
   }
 
@@ -71,20 +73,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Mapa de ejemplo
-              Container(
+              // **Mapa de TrackingScreen**
+              SizedBox(
                 height: 200,
-                width: double.infinity,
-                decoration: const BoxDecoration(color: Colors.blue),
-                child: const Center(
-                  child: Text(
-                    'Map Placeholder',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                child: FlutterMap(
+                  options: MapOptions(
+                    center: LatLng(51.5, -0.09),
+                    zoom: 13.0,
                   ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      subdomains: const ['a', 'b', 'c'],
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 20),
