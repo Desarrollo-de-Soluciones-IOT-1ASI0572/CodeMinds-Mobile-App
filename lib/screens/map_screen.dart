@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-//import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 
@@ -140,13 +140,13 @@ class _MapScreenState extends State<MapScreen> {
         onTap: (index) {
           switch (index) {
             case 0:
-              //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
               break;
             case 1:
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MapScreen()));
               break;
             case 2:
-              //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
               break;
             case 3:
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));

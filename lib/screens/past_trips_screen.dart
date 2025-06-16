@@ -1,6 +1,6 @@
-//import 'package:codeminds_mobile_application/screens/map_screen.dart';
+import 'package:codeminds_mobile_application/screens/map_screen.dart';
 import 'package:flutter/material.dart';
-//import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
 import 'package:codeminds_mobile_application/screens/tracking_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
@@ -46,13 +46,13 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
 
     switch (index) {
       case 0:
-        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
         break;
       case 1:
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MapScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MapScreen()));
         break;
       case 2:
-        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
         break;
       case 3:
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));
@@ -70,6 +70,7 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Logo y título "Past Trips"
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -160,6 +161,7 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
             ),
             const SizedBox(width: 12),
 
+            // Información del viaje
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,6 +172,7 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
               ),
             ),
 
+            // Iconos de información, eliminar y editar título
             IconButton(
               icon: const Icon(Icons.info, color: Colors.blue),
               onPressed: () => _showTripDetails(trip),
