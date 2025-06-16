@@ -1,6 +1,3 @@
-import 'package:codeminds_mobile_application/screens/account_screen.dart';
-import 'package:codeminds_mobile_application/screens/home_screen.dart';
-import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -35,31 +32,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
       'speed': '20 km/h',
     },
   };
-
-
-
-  int _selectedIndex = 1;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
-        break;
-      case 1:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const TrackingScreen()));
-        break;
-      case 2:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const NotificationParentScreen()));
-        break;
-      case 3:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AccountScreen()));
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +104,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
           ),
         ],
       ),
-
     );
   }
 
