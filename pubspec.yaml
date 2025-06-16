@@ -19,8 +19,8 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
-
+  sdk: ^3.5.3
+#Cambiarlo despues a 3.8.1
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -59,14 +59,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
-
+  assets:
+    # An image asset can refer to one or more resolution-specific "variants", see
+    # https://flutter.dev/assets-and-images/#resolution-aware
+    - assets/images/
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 

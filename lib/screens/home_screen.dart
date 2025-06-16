@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-//import 'package:codeminds_mobile_application/features/notification/data/remote/notification_service.dart';
-//import 'package:codeminds_mobile_application/features/notification/data/repository/notification_repository.dart';
-//import 'package:codeminds_mobile_application/features/notification/domain/notification.dart';
-//import 'package:codeminds_mobile_application/screens/children_screen.dart';
+import 'package:codeminds_mobile_application/features/notification/data/remote/notification_service.dart';
+import 'package:codeminds_mobile_application/features/notification/data/repository/notification_repository.dart';
+import 'package:codeminds_mobile_application/features/notification/domain/notification.dart';
+import 'package:codeminds_mobile_application/screens/children_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   final String name;
   final VoidCallback onSeeMoreNotifications;
+
 
   const HomeScreen({
     super.key,
@@ -22,16 +24,17 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> children = ['Alice', 'Bob', 'Charlie'];
-  //List<Notification> _notifications = [];
+
+  List<Notification> _notifications = [];
   int id = 1;
 
   Future<void> _loadData() async {
-    //List<Notification> notifications = await NotificationRepository(
-      //notificationService: NotificationService(),
-    //).getNotificationsByUserId(id);
+    List<Notification> notifications = await NotificationRepository(
+      notificationService: NotificationService(),
+    ).getNotificationsByUserId(id);
 
     setState(() {
-      //_notifications = notifications;
+      _notifications = notifications;
     });
   }
 
@@ -125,10 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (_) => const ChildrenScreen()),
-                      // );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ChildrenScreen()),
+                      );
                     },
                     child: const Text('View All'),
                   ),
@@ -155,24 +158,24 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 10),
 
               Column(
-                // children: _notifications.isEmpty
-                //     ? [const Center(child: CircularProgressIndicator())]
-                //     : _notifications.take(2).map((notification) {
-                //   return Container(
-                //     width: double.infinity,
-                //     margin: const EdgeInsets.only(bottom: 8),
-                //     padding: const EdgeInsets.symmetric(
-                //       vertical: 12,
-                //       horizontal: 16,
-                //     ),
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Colors.black26),
-                //       borderRadius: BorderRadius.circular(12),
-                //       color: Colors.white,
-                //     ),
-                //     child: Text(notification.message),
-                //   );
-                // }).toList(),
+                children: _notifications.isEmpty
+                    ? [const Center(child: CircularProgressIndicator())]
+                    : _notifications.take(2).map((notification) {
+                  return Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black26),
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                    ),
+                    child: Text(notification.message),
+                  );
+                }).toList(),
               ),
             ],
           ),
