@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:codeminds_mobile_application/screens/home_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
-//import 'package:codeminds_mobile_application/screens/add_student_screen.dart';
+import 'package:codeminds_mobile_application/screens/add_student_screen.dart';
 import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_bar.dart';
-
-import 'add_student_screen.dart';
 
 class ChildrenScreen extends StatefulWidget {
   const ChildrenScreen({super.key});
@@ -22,11 +20,11 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     {'name': 'Ana Torres', 'image': 'assets/images/circle-user.png'},
   ];
 
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // **Marcando Home como activo**
 
   void _onItemTapped(int index) {
     if (_selectedIndex == index) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).popUntil((route) => route.isFirst); // **Regresa correctamente a HomeScreen**
       return;
     }
 
@@ -36,10 +34,10 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
 
     switch (index) {
       case 0:
-        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen(onSeeMoreNotifications: () {})));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen(onSeeMoreNotifications: () {})));
         break;
       case 2:
-        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
         break;
       case 3:
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));
@@ -56,6 +54,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              // **Imagen y título alineados a la izquierda**
               Row(
                 children: [
                   Image.asset(
@@ -72,6 +71,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Botón "Add Student"
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -94,6 +94,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Lista de estudiantes
               Expanded(
                 child: ListView.builder(
                   itemCount: childrenData.length,
@@ -108,6 +109,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
         ),
       ),
 
+      // **Integración del CustomBottomNavigationBar corregido**
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -124,12 +126,14 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
+            // Imagen del estudiante
             CircleAvatar(
               radius: 40,
               backgroundImage: AssetImage(student['image']!),
             ),
             const SizedBox(width: 12.0),
 
+            // Nombre del estudiante
             Expanded(
               child: Text(
                 student['name']!,
@@ -137,16 +141,19 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
               ),
             ),
 
+            // Icono "Perfil" para ver detalles
             IconButton(
               icon: const Icon(Icons.person, color: Colors.blue),
               onPressed: () => _showStudentDetails(student),
             ),
 
+            // Botón de editar perfil
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.orange),
               onPressed: () {},
             ),
 
+            // Botón de eliminar perfil con confirmación
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () => _confirmDelete(index),

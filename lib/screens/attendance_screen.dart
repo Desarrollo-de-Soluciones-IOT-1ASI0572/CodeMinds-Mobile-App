@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-//import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
 import 'package:codeminds_mobile_application/screens/tracking_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
@@ -29,13 +29,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     switch (index) {
       case 0:
-        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
         break;
       case 1:
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const TrackingScreen()));
         break;
       case 2:
-        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
         break;
       case 3:
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));
@@ -53,6 +53,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Logo y título "Attendance"
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -70,6 +71,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Lista de estudiantes
               Expanded(
                 child: ListView.builder(
                   itemCount: students.length,
@@ -82,6 +84,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
               const SizedBox(height: 16),
 
+              // Botón "Load More"
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -101,6 +104,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ),
       ),
 
+      // **Footer de navegación exclusivo para conductores**
       bottomNavigationBar: CustomBottomNavigationBarDriver(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -119,12 +123,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           children: [
             Row(
               children: [
+                // Imagen del estudiante
                 CircleAvatar(
                   radius: 40,
                   backgroundImage: AssetImage(student['image']),
                 ),
                 const SizedBox(width: 12.0),
 
+                // Nombre del estudiante
                 Expanded(
                   child: Text(
                     student['name'],
@@ -132,6 +138,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   ),
                 ),
 
+                // Estado de asistencia resaltado
                 Text(
                   student['status'],
                   style: TextStyle(
@@ -145,6 +152,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
             const SizedBox(height: 10),
 
+            // Botón "Manage Attendance"
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'account_Update_screen.dart';
-// import 'package:codeminds_mobile_application/screens/login_screen.dart';
-
+import 'package:codeminds_mobile_application/screens/login_screen.dart';
+import 'package:codeminds_mobile_application/screens/account_update_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -50,11 +48,11 @@ class AccountScreen extends StatelessWidget {
             _buildButton('Delete Account', Icons.delete, Colors.red, () {}),
             const SizedBox(height: 12.0),
             _buildButton('Log Out', Icons.logout, Colors.black, () {
-              // Navigator.pushAndRemoveUntil(
-              //   context,
-              //   MaterialPageRoute(builder: (_) => const LoginScreen()),
-              //       (route) => false,
-              // );
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+              );
             }),
           ],
         ),
