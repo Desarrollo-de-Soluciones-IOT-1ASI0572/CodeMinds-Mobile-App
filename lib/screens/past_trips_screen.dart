@@ -1,185 +1,230 @@
 import 'package:flutter/material.dart';
-// import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
-import 'package:codeminds_mobile_application/screens/tracking_screen.dart';
-import 'package:codeminds_mobile_application/screens/notification_screen.dart';
-import 'package:codeminds_mobile_application/screens/account_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:codeminds_mobile_application/features/tracking/data/remote/trip_service.dart';
+import 'package:codeminds_mobile_application/features/tracking/domain/trip.dart';
 
-class PastTripsScreen extends StatelessWidget {
+class PastTripsScreen extends StatefulWidget {
   const PastTripsScreen({super.key});
 
   @override
+  _PastTripsScreenState createState() => _PastTripsScreenState();
+}
+
+class _PastTripsScreenState extends State<PastTripsScreen> {
+  late TripService tripService;
+
+  @override
+  void initState() {
+    super.initState();
+    tripService = TripService();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Datos de los viajes anteriores
-    final List<Map<String, dynamic>> pastTrips = [
-      {
-        'date': 'June 10, 2025',
-        'duration': '45 mins',
-        'mapImage': 'assets/images/PTrip1.png',
-      },
-      {
-        'date': 'June 8, 2025',
-        'duration': '40 mins',
-        'mapImage': 'assets/images/PTrip2.png',
-      },
-      {
-        'date': 'June 5, 2025',
-        'duration': '50 mins',
-        'mapImage': 'assets/images/PTrip3.png',
-      },
-    ];
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Sección del logo y título "Past Trips"
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/CodeMinds-Logo.png', // Ruta del logo
-                    height: 50,
-                    width: 50,
+      appBar: AppBar(title: const Text('Past Trips')),
+      body: FutureBuilder<List<Trip>>(
+        future: _getTrips(), // Convierte los DTO a Trip
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(child: Text('Error loading trips.'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No trips available.'));
+          } else {
+            final trips = snapshot.data!;
+
+            return ListView.separated(
+              itemCount: trips.length,
+              separatorBuilder: (_, __) =>
+                  const Divider(thickness: 1, color: Colors.lightBlueAccent),
+              itemBuilder: (context, index) {
+                final trip = trips[index];
+                final formattedDate =
+                    "${_monthName(trip.startTime.month)}, ${trip.startTime.day}";
+
+                return ListTile(
+                  contentPadding: const EdgeInsets.all(12),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        formattedDate,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 18),
+                        onPressed: () {
+                          // TODO: lógica para cambiar nombre
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Past Trips',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      children: [
+                        // Imagen (puedes reemplazar con un mapa real si tienes URL)
+                        Container(
+                          width: 100,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            image: const DecorationImage(
+                              image: AssetImage('assets/map_placeholder.jpg'),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.info_outline, size: 28),
+                          onPressed: () {
+                            _showTripInfoDialog(context, trip);
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete,
+                            size: 28,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            _showDeleteConfirmationDialog(context, trip);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Lista de viajes anteriores
-              Expanded(
-                child: ListView.builder(
-                  itemCount: pastTrips.length,
-                  itemBuilder: (context, index) {
-                    final trip = pastTrips[index];
-                    return _buildTripCard(trip['date'], trip['duration'], trip['mapImage']);
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Duración promedio del viaje
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Average Trip Duration: 45 mins',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Botón "Load More"
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: () {
-                    // Acción para cargar más viajes
-                  },
-                  child: const Text(
-                    'Load More',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-
-      // Footer de navegación (manteniendo el código anterior)
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.track_changes), label: 'Tracking'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
-        ],
-        currentIndex: 0,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.black54,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
-              break;
-            case 1:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const TrackingScreen()));
-              break;
-            case 2:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationParentScreen()));
-              break;
-            case 3:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));
-              break;
+                );
+              },
+            );
           }
         },
       ),
     );
   }
 
-  Widget _buildTripCard(String date, String duration, String mapImage) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            // Miniatura del mapa
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                mapImage,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 12),
+  // Método para convertir los TripDTO a Trip
+  Future<List<Trip>> _getTrips() async {
+    final tripDTOs = await tripService.getAllTrips();
+    return tripDTOs.map((dto) => dto.toTrip()).toList();
+  }
 
-            // Información del viaje
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(date, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('Duration: $duration', style: const TextStyle(fontSize: 14)),
-                ],
-              ),
-            ),
+  String _monthName(int month) {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return months[month - 1];
+  }
 
-            // Iconos de acciones
-            IconButton(
-              icon: const Icon(Icons.info, color: Colors.blue),
-              onPressed: () {
-                // Acción de ver detalles
-              },
+  void _showTripInfoDialog(BuildContext context, Trip trip) {
+    final DateFormat timeFormat = DateFormat.jm();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Trip Details'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoRow(
+                  'Date:',
+                  "${_monthName(trip.startTime.month)} ${trip.startTime.day}",
+                ),
+                _buildInfoRow(
+                  'Starting Hour:',
+                  timeFormat.format(trip.startTime),
+                ),
+                _buildInfoRow('Starting Address:', trip.origin),
+                _buildInfoRow(
+                  'Finishing Hour:',
+                  timeFormat.format(trip.endTime),
+                ),
+                _buildInfoRow('Finishing Address:', trip.destination),
+              ],
             ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+          ),
+          actions: <Widget>[
+            TextButton(
               onPressed: () {
-                // Acción de eliminar viaje
+                Navigator.of(context).pop();
               },
+              child: const Text('Close'),
             ),
           ],
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text('$title ', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(value),
+        ],
       ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, Trip trip) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Are you sure you want to delete this trip?',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            "You won't be able to see this trip again once you delete it.",
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Eliminar el viaje
+                bool success = await tripService.deleteTrip(trip.id);
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Trip deleted successfully')),
+                  );
+                  Navigator.of(context).pop();
+                  setState(() {});
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to delete the trip')),
+                  );
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
