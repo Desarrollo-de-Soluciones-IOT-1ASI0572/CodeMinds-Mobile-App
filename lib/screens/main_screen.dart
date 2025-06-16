@@ -15,6 +15,14 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
+
+  final List<Widget> _screens = [
+    HomeScreen(onSeeMoreNotifications: () {  },),
+    const TrackingScreen(),
+    const NotificationScreen(),
+    const AccountScreen(),
+  ];
+
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
