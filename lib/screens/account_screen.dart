@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
+import 'account_Update_screen.dart';
 // import 'package:codeminds_mobile_application/screens/login_screen.dart';
+
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -7,7 +10,7 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD), 
+      backgroundColor: const Color(0xFFE3F2FD),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
         child: Column(
@@ -38,15 +41,15 @@ class AccountScreen extends StatelessWidget {
             const SizedBox(height: 16.0),
 
             _buildButton('Update Information', Icons.edit, Colors.blue, () {
-              // Acción de actualizar información
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AccountUpdateScreen()),
+              );
             }),
             const SizedBox(height: 12.0),
-            _buildButton('Delete Account', Icons.delete, Colors.red, () {
-              // Acción de eliminar cuenta
-            }),
+            _buildButton('Delete Account', Icons.delete, Colors.red, () {}),
             const SizedBox(height: 12.0),
             _buildButton('Log Out', Icons.logout, Colors.black, () {
-              // Redirigir a LoginScreen y eliminar historial
               // Navigator.pushAndRemoveUntil(
               //   context,
               //   MaterialPageRoute(builder: (_) => const LoginScreen()),
