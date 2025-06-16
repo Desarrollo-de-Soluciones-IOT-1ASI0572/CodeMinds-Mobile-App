@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:codeminds_mobile_application/screens/home_screen.dart';
-// import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
 
 class RegisterPhotoScreen extends StatelessWidget {
   final String selectedRole;
@@ -27,23 +27,20 @@ class RegisterPhotoScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A8A), // Color acorde a la imagen
+                  color: Color(0xFF1E3A8A),
                 ),
               ),
               const SizedBox(height: 16.0),
 
-              // Imagen debajo del título
               _buildUserImage(),
               const SizedBox(height: 16.0),
 
-              // Texto "Upload Photo from your phone"
               const Text(
                 'Upload Photo from your phone',
                 style: TextStyle(fontSize: 16, color: Colors.black54),
               ),
               const SizedBox(height: 12.0),
 
-              // Botones Upload y Next con los estilos correctos
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -54,7 +51,6 @@ class RegisterPhotoScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
                     ),
                     onPressed: () {
-                      // Acción de Upload
                     },
                     child: const Text(
                       'Upload',
@@ -69,14 +65,14 @@ class RegisterPhotoScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
                     ),
                     onPressed: () {
-                      // bool isDriver = selectedRole == "Driver"; // Verifica correctamente el rol
-                      //
-                      // Navigator.pushReplacement(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => isDriver ? HomeDriverScreen() : HomeScreen(onSeeMoreNotifications: () {  },),
-                      //   ),
-                      // );
+                      bool isDriver = selectedRole == "Driver";
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => isDriver ? HomeDriverScreen() : HomeScreen(onSeeMoreNotifications: () {  },),
+                        ),
+                      );
                     },
                     child: const Text(
                       'Next',
