@@ -205,10 +205,38 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.info, color: Colors.blue),
-              onPressed: () => _showTripDetails(trip),
+              onPressed: () => _showTripInfoDialog(context, trip),
             ),
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _showDeleteConfirmationDialog(context, trip),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _editTripName(Trip trip, int index) {
+    final TextEditingController _titleController = TextEditingController(
+        text: "Trip ${trip.id}"
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Trip Name'),
+          content: TextField(
+            controller: _titleController,
+            decoration: const InputDecoration(labelText: 'Trip Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
               onPressed: () {
                 // Lógica para guardar el nuevo nombre
                 Navigator.pop(context);
