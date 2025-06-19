@@ -48,6 +48,9 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/icons/bus_marker.png
+    - assets/icons/bus_marker_.png
+    - assets/icons/bus_marker_2.png
 
   # Si tienes assets, como imágenes o fuentes, agrégalas aquí:
   # assets:
