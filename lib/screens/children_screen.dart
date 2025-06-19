@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:codeminds_mobile_application/screens/home_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 import 'package:codeminds_mobile_application/screens/add_student_screen.dart';
@@ -34,7 +34,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen(onSeeMoreNotifications: () {})));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeParentScreen(onSeeMoreNotifications: () {})));
         break;
       case 2:
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
