@@ -18,5 +18,5 @@ class AppConstants {
   static const String notificationsByUserAndTripEndpoint =
       '$notificationsBase/user-id/{userId}/trip-id/{tripId}';
 
-  static const String tripsEndpoint = 'vehicle-tracking/trips';
+  static const String tripsEndpoint = '/vehicle-tracking/trips';
 }

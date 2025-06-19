@@ -1,4 +1,5 @@
 import 'package:codeminds_mobile_application/screens/children_screen.dart';
+import 'package:codeminds_mobile_application/screens/past_trips_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'tracking_screen.dart';
@@ -26,7 +27,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final List<Widget> _screens = [
       HomeScreen(onSeeMoreNotifications: () => _onItemTapped(2)),
-      const TrackingScreen(),
+      //const TrackingScreen(),
+      const PastTripsScreen(),
       const NotificationScreen(),
       const AccountScreen(),
       const ChildrenScreen()
