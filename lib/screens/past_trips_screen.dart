@@ -24,8 +24,13 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
     _tripLocationsCache = {};
   }
 
-  Future<List<Trip>> _getTrips() async {
+  /*Future<List<Trip>> _getTrips() async {
     final tripDTOs = await tripService.getAllTrips();
+    return tripDTOs.map((dto) => dto.toTrip()).toList();
+  }*/
+
+  Future<List<Trip>> _getTrips() async {
+    final tripDTOs = await tripService.getCompletedTrips(); // Usa el nuevo método
     return tripDTOs.map((dto) => dto.toTrip()).toList();
   }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:codeminds_mobile_application/screens/home_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
 
 class RegisterPhotoScreen extends StatelessWidget {
@@ -70,7 +70,7 @@ class RegisterPhotoScreen extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => isDriver ? HomeDriverScreen() : HomeScreen(onSeeMoreNotifications: () {  },),
+                          builder: (context) => isDriver ? HomeDriverScreen() : HomeParentScreen(onSeeMoreNotifications: () {  },),
                         ),
                       );
                     },
