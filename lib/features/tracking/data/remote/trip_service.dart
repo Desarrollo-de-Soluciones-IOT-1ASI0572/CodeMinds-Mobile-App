@@ -61,4 +61,37 @@ class TripService {
       return [];
     }
   }
+
+  Future<Map<String, dynamic>?> getCurrentVehicleLocation(int studentId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConstants.baseUrl}/vehicle-tracking/students/$studentId/current-vehicle-location'),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching vehicle location: $e');
+      return null;
+    }
+  }
+
+  Future<List<TripDTO>> getCompletedTrips() async {
+    String url = '${AppConstants.baseUrl}${AppConstants.tripsEndpointComplete}';
+
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> jsonResponse = json.decode(response.body);
+        return jsonResponse.map((model) => TripDTO.fromJson(model)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
 }
