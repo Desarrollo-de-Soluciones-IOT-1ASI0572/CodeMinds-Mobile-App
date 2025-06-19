@@ -1,11 +1,65 @@
+import 'package:codeminds_mobile_application/features/tracking/domain/location.dart';
 import 'package:flutter/material.dart';
-// import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
-import 'package:codeminds_mobile_application/screens/tracking_screen.dart';
-import 'package:codeminds_mobile_application/screens/notification_screen.dart';
-import 'package:codeminds_mobile_application/screens/account_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:codeminds_mobile_application/features/tracking/data/remote/trip_service.dart';
+import 'package:codeminds_mobile_application/features/tracking/domain/trip.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'trip_map.dart';
 
-class PastTripsScreen extends StatelessWidget {
+class PastTripsScreen extends StatefulWidget {
   const PastTripsScreen({super.key});
+
+  @override
+  _PastTripsScreenState createState() => _PastTripsScreenState();
+}
+
+class _PastTripsScreenState extends State<PastTripsScreen> {
+  late TripService tripService;
+  late Map<int, List<Location>> _tripLocationsCache;
+
+  @override
+  void initState() {
+    super.initState();
+    tripService = TripService();
+    _tripLocationsCache = {};
+  }
+
+  Future<List<Trip>> _getTrips() async {
+    final tripDTOs = await tripService.getAllTrips();
+    return tripDTOs.map((dto) => dto.toTrip()).toList();
+  }
+
+  Future<List<Location>> _getTripLocations(int tripId) async {
+    if (_tripLocationsCache.containsKey(tripId)) {
+      return _tripLocationsCache[tripId]!;
+    }
+
+    final locations = await tripService.getTripLocations(tripId);
+    _tripLocationsCache[tripId] = locations;
+    return locations;
+  }
+
+  List<LatLng> _convertLocationsToLatLng(List<Location> locations) {
+    return locations.map((loc) => LatLng(loc.latitude, loc.longitude)).toList();
+  }
+
+  String _calculateAverageDuration(List<Trip> trips) {
+    if (trips.isEmpty) return '0 mins';
+
+    final totalDuration = trips.fold(
+        Duration.zero,
+            (sum, trip) => sum + trip.endTime.difference(trip.startTime)
+    );
+
+    final averageInMinutes = totalDuration.inMinutes ~/ trips.length;
+
+    if (averageInMinutes < 60) return '$averageInMinutes mins';
+
+    final hours = averageInMinutes ~/ 60;
+    final minutes = averageInMinutes % 60;
+
+    return '${hours}h ${minutes}m';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,42 +101,43 @@ class PastTripsScreen extends StatelessWidget {
                             ),
                           ),
 
+                          // Duración promedio del viaje (dinámica)
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
                               'Average Trip Duration: $averageDuration',
                               style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold
                               ),
                             ),
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 16),
 
                           // Botón "Load More"
-                          /*Center(
+                          Center(
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 32
+                                    vertical: 12,
+                                    horizontal: 32
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)
+                                    borderRadius: BorderRadius.circular(8)
                                 ),
                               ),
                               onPressed: () {},
                               child: const Text(
                                 'Load More',
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white
+                                    fontSize: 16,
+                                    color: Colors.white
                                 ),
                               ),
                             ),
-                          ),*/
+                          ),
                         ],
                       );
                     }
@@ -96,7 +151,7 @@ class PastTripsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTripCard(String date, String duration, String mapImage) {
+  Widget _buildTripCard(Trip trip, String formattedDate, int index) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -105,7 +160,7 @@ class PastTripsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            // Miniatura del mapa
+            // Miniatura del mapa (placeholder)
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Container(
@@ -124,14 +179,30 @@ class PastTripsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(date, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(
+                    "Trip ${trip.id}",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text('Duration: $duration', style: const TextStyle(fontSize: 14)),
+                  Text(
+                    formattedDate,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            // Iconos de acciones
+            // Botones de acción
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.orange),
+              onPressed: () => _editTripName(trip, index),
+            ),
             IconButton(
               icon: const Icon(Icons.info, color: Colors.blue),
               onPressed: () => _showTripInfoDialog(context, trip),
@@ -148,7 +219,7 @@ class PastTripsScreen extends StatelessWidget {
 
   void _editTripName(Trip trip, int index) {
     final TextEditingController _titleController = TextEditingController(
-      text: "Trip ${trip.id}"
+        text: "Trip ${trip.id}"
     );
 
     showDialog(
@@ -213,8 +284,64 @@ class PastTripsScreen extends StatelessWidget {
               child: const Text('Close'),
             ),
           ],
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text('$title ', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Flexible(child: Text(value)),
+        ],
       ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, Trip trip) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Trip?'),
+          content: const Text(
+              "This action cannot be undone. The trip data will be permanently deleted."
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                bool success = await tripService.deleteTrip(trip.id);
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Trip deleted successfully'),
+                    ),
+                  );
+                  setState(() {
+                    _tripLocationsCache.remove(trip.id);
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to delete trip')),
+                  );
+                }
+              },
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
