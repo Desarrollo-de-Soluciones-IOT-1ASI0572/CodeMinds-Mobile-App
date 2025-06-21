@@ -8,7 +8,9 @@ import 'account_screen.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final String token; // Agrega el parámetro token
+
+  const MainScreen({super.key, required this.token}); // Constructor con token
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -28,7 +30,6 @@ class _MainScreenState extends State<MainScreen> {
     final List<Widget> _screens = [
       HomeParentScreen(onSeeMoreNotifications: () => _onItemTapped(2)),
       const TrackingScreen(),
-      //const PastTripsScreen(),
       const NotificationScreen(),
       const AccountScreen(),
       const ChildrenScreen()

@@ -1,10 +1,64 @@
-import 'package:codeminds_mobile_application/screens/main_screen.dart';
-import 'package:codeminds_mobile_application/screens/register_screen.dart';
+import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:codeminds_mobile_application/screens/main_screen.dart';
+import 'package:codeminds_mobile_application/screens/register_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+import '../core/app_constants.dart';
+
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String? _errorMessage;
+
+  Future<void> _login() async {
+    final String username = _usernameController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please fill in all fields.';
+      });
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}${AppConstants.singInEndpoint}'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final String token = data['token'];
+
+        // Navega al MainScreen y pasa el token
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainScreen(token: token),
+          ),
+        );
+      } else {
+        setState(() {
+          _errorMessage = 'Invalid credentials.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An error occurred. Please try again.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +68,6 @@ class LoginScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // App Logo
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Image.asset(
@@ -23,7 +76,6 @@ class LoginScreen extends StatelessWidget {
                 width: 150,
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -48,18 +100,17 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24.0),
-
-            // Login Form
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextField(
+                    controller: _usernameController,
                     decoration: InputDecoration(
                       labelText: 'Username',
                       filled: true,
-                      fillColor: Color(0xFFFFFDE7), // light yellow
+                      fillColor: const Color(0xFFFFFDE7),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -67,11 +118,12 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16.0),
                   TextField(
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       filled: true,
-                      fillColor: Color(0xFFFFFDE7), // light yellow
+                      fillColor: const Color(0xFFFFFDE7),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -79,26 +131,26 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
-                    onPressed: () {
-                      // Navega al MainScreen que incluye el BottomNavigationBar
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MainScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: _login,
                     child: const Text('Log In'),
                   ),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
                   const SizedBox(height: 16.0),
                   Text.rich(
                     TextSpan(
                       text: "Don't have an account? ",
-                      style: TextStyle(fontSize: 16.0, color: Colors.black54),
+                      style: const TextStyle(fontSize: 16.0, color: Colors.black54),
                       children: [
                         TextSpan(
                           text: 'Register',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
