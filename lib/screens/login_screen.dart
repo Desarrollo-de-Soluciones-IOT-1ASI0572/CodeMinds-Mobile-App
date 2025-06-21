@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:codeminds_mobile_application/screens/role_selection_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -160,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const RegisterScreen(),
+                                  builder: (context) => const RoleSelectionScreen(),
                                 ),
                               );
                             },
