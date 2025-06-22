@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_parent_screen.dart';
+import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/role_selection_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -38,23 +41,48 @@ class _LoginScreenState extends State<LoginScreen> {
         body: jsonEncode({'username': username, 'password': password}),
       );
 
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final String token = data['token'];
+        final String role = data['role'];
 
-        // Navega al MainScreen y pasa el token
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MainScreen(token: token),
-          ),
-        );
+        // Navigate based on the role
+        if (role == 'ROLE_PARENT') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeParentScreen(
+                name: username,
+                onSeeMoreNotifications: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                  );
+                },
+              ),
+            ),
+          );
+        } else if (role == 'ROLE_DRIVER') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeDriverScreen(name: username),
+            ),
+          );
+        } else {
+          setState(() {
+            _errorMessage = 'Invalid role.';
+          });
+        }
       } else {
         setState(() {
           _errorMessage = 'Invalid credentials.';
         });
       }
     } catch (e) {
+      print('Error: $e');
       setState(() {
         _errorMessage = 'An error occurred. Please try again.';
       });
