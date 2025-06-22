@@ -25,15 +25,41 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
-  List<dynamic> students = [];
-  bool _isLoading = true;
-  bool _hasActiveTrip = false;
-  int? _activeTripId;
 
   @override
   void initState() {
     super.initState();
     _fetchActiveTrip();
+  }
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    const HomeDriverScreen(selectedIndex: 0)));
+        break;
+      case 1:
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const TrackingScreen(selectedIndex: 1)));
+        break;
+      case 2:
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    const NotificationScreen(selectedIndex: 2)));
+        break;
+      case 3:
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const AccountScreen(selectedIndex: 3)));
+        break;
+    }
   }
 
   Future<void> _fetchActiveTrip() async {
@@ -137,6 +163,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ],
       ),
       body: _buildContent(),
+      bottomNavigationBar: CustomBottomNavigationBarDriver(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
     );
   }
 }

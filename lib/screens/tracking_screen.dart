@@ -1,9 +1,16 @@
+import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_parent_screen.dart';
+import 'package:codeminds_mobile_application/screens/notification_screen.dart';
+import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:codeminds_mobile_application/screens/account_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TrackingScreen extends StatefulWidget {
-  const TrackingScreen({super.key});
+  final int selectedIndex;
+  const TrackingScreen({super.key, required this.selectedIndex});
 
   @override
   _TrackingScreenState createState() => _TrackingScreenState();
@@ -32,6 +39,63 @@ class _TrackingScreenState extends State<TrackingScreen> {
       'speed': '20 km/h',
     },
   };
+
+  int _selectedIndex = 0;
+
+  void _navigateToHomeParent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String userName = prefs.getString('user_name') ?? "Default Name";
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeParentScreen(
+          name: userName,
+          onSeeMoreNotifications: () {},
+          selectedIndex: 0,
+        ),
+      ),
+    );
+  }
+
+  void _onNavTap(int index) {
+    if (_selectedIndex == index) return;
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        _navigateToHomeParent();
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const TrackingScreen(selectedIndex: 1)),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const NotificationScreen(selectedIndex: 2)),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const AccountScreen(selectedIndex: 3)),
+        );
+        break;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +130,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
               ),
               children: [
                 TileLayer(
-                  urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  urlTemplate:
+                      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                   subdomains: const ['a', 'b', 'c'],
                 ),
               ],
@@ -87,7 +152,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                         selectedKid = newValue!;
                       });
                     },
-                    items: kidData.keys.map<DropdownMenuItem<String>>((String key) {
+                    items: kidData.keys
+                        .map<DropdownMenuItem<String>>((String key) {
                       return DropdownMenuItem<String>(
                         value: key,
                         child: Text(key),
@@ -95,14 +161,21 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     }).toList(),
                   ),
                 ),
-                buildInfoRow('Location:', Text(kidData[selectedKid]!['location'])),
+                buildInfoRow(
+                    'Location:', Text(kidData[selectedKid]!['location'])),
                 buildInfoRow('Status:', Text(kidData[selectedKid]!['status'])),
-                buildInfoRow('Distance(Km):', Text(kidData[selectedKid]!['distance'])),
-                buildInfoRow('Speed(km/h):', Text(kidData[selectedKid]!['speed'])),
+                buildInfoRow(
+                    'Distance(Km):', Text(kidData[selectedKid]!['distance'])),
+                buildInfoRow(
+                    'Speed(km/h):', Text(kidData[selectedKid]!['speed'])),
               ],
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onNavTap,
       ),
     );
   }

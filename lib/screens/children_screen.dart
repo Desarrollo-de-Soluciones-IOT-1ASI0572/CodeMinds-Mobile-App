@@ -1,9 +1,12 @@
+import 'package:codeminds_mobile_application/features/student/data/remote/student.dart';
 import 'package:flutter/material.dart';
 import 'package:codeminds_mobile_application/screens/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 import 'package:codeminds_mobile_application/screens/add_student_screen.dart';
 import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_bar.dart';
+import 'package:codeminds_mobile_application/features/student/data/remote/student_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChildrenScreen extends StatefulWidget {
   const ChildrenScreen({super.key});
@@ -13,18 +16,48 @@ class ChildrenScreen extends StatefulWidget {
 }
 
 class _ChildrenScreenState extends State<ChildrenScreen> {
-  final List<Map<String, String>> childrenData = [
-    {'name': 'Juan Pérez', 'image': 'assets/images/circle-user.png'},
-    {'name': 'María López', 'image': 'assets/images/circle-user.png'},
-    {'name': 'Carlos Gómez', 'image': 'assets/images/circle-user.png'},
-    {'name': 'Ana Torres', 'image': 'assets/images/circle-user.png'},
-  ];
+  List<StudentModel> _students = [];
+  bool _isLoading = true;
+  int _selectedIndex = 0;
 
-  int _selectedIndex = 0; // **Marcando Home como activo**
+  @override
+  void initState() {
+    super.initState();
+    _loadStudents();
+  }
+
+  Future<void> _loadStudents() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('user_id');
+    if (userId == null) {
+      setState(() {
+        _students = [];
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final students = await StudentService().getStudentsByParentUserId(userId);
+      setState(() {
+        _students = students;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _students = [];
+        _isLoading = false;
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     if (_selectedIndex == index) {
-      Navigator.of(context).popUntil((route) => route.isFirst); // **Regresa correctamente a HomeScreen**
+      Navigator.of(context).popUntil((route) => route.isFirst);
       return;
     }
 
@@ -34,13 +67,24 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeParentScreen(onSeeMoreNotifications: () {})));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => HomeParentScreen(
+                    onSeeMoreNotifications: () {}, selectedIndex: 0)));
         break;
       case 2:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    const NotificationScreen(selectedIndex: 2)));
         break;
       case 3:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const AccountScreen(selectedIndex: 3)));
         break;
     }
   }
@@ -54,7 +98,6 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // **Imagen y título alineados a la izquierda**
               Row(
                 children: [
                   Image.asset(
@@ -70,20 +113,20 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Botón "Add Student"
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AddStudentScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const AddStudentScreen()),
                     );
                   },
                   child: const Text(
@@ -93,23 +136,23 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Lista de estudiantes
               Expanded(
-                child: ListView.builder(
-                  itemCount: childrenData.length,
-                  itemBuilder: (context, index) {
-                    final student = childrenData[index];
-                    return _buildChildTile(student, index);
-                  },
-                ),
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _students.isEmpty
+                        ? const Center(child: Text('No students found.'))
+                        : ListView.builder(
+                            itemCount: _students.length,
+                            itemBuilder: (context, index) {
+                              final student = _students[index];
+                              return _buildChildTile(student, index);
+                            },
+                          ),
               ),
             ],
           ),
         ),
       ),
-
-      // **Integración del CustomBottomNavigationBar corregido**
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -117,7 +160,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     );
   }
 
-  Widget _buildChildTile(Map<String, String> student, int index) {
+  Widget _buildChildTile(StudentModel student, int index) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -126,37 +169,32 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            // Imagen del estudiante
             CircleAvatar(
               radius: 40,
-              backgroundImage: AssetImage(student['image']!),
+              backgroundImage: student.studentPhotoUrl.isNotEmpty
+                  ? NetworkImage(student.studentPhotoUrl)
+                  : const AssetImage('assets/images/circle-user.png')
+                      as ImageProvider,
             ),
             const SizedBox(width: 12.0),
-
-            // Nombre del estudiante
             Expanded(
               child: Text(
-                student['name']!,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                '${student.name} ${student.lastName}',
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-
-            // Icono "Perfil" para ver detalles
             IconButton(
               icon: const Icon(Icons.person, color: Colors.blue),
               onPressed: () => _showStudentDetails(student),
             ),
-
-            // Botón de editar perfil
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.orange),
               onPressed: () {},
             ),
-
-            // Botón de eliminar perfil con confirmación
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _confirmDelete(index),
+              onPressed: () => _confirmDelete(student, index),
             ),
           ],
         ),
@@ -164,24 +202,27 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     );
   }
 
-  void _showStudentDetails(Map<String, String> student) {
+  void _showStudentDetails(StudentModel student) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(student['name']!),
+          title: Text('${student.name} ${student.lastName}'),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('Full Name:'),
-              Text(student['name']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              const Text('Age:'),
-              const Text('12 years old', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('${student.name} ${student.lastName}',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               const Text('Address:'),
-              const Text('Av. Primavera 123', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(student.homeAddress,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              const Text('School:'),
+              Text(student.schoolAddress,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
           actions: [
@@ -195,7 +236,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     );
   }
 
-  void _confirmDelete(int index) {
+  void _confirmDelete(StudentModel student, int index) {
     showDialog(
       context: context,
       builder: (context) {
@@ -210,7 +251,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  childrenData.removeAt(index);
+                  _students.removeAt(index);
                 });
                 Navigator.pop(context);
               },
