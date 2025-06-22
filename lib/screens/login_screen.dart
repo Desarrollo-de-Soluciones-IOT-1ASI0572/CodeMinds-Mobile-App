@@ -57,7 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setInt('user_id', userId);
         await prefs.setString('role', role);
         await prefs.setString('user_name', username);
-        final int driverId = data['id'];
 
         // Navigate based on the role
         if (role == 'ROLE_PARENT') {
@@ -82,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomeDriverScreen(name: username, driverId: driverId, authToken: token,),
+              builder: (context) => HomeDriverScreen(name: username),
             ),
           );
         } else {

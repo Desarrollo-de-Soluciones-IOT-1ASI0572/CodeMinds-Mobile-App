@@ -6,4 +6,9 @@ class TripRepository {
   final TripService tripService;
 
   TripRepository({required this.tripService});
+
+  Future<List<Trip>> getAllTrips() async {
+    List<TripDTO> tripDtoList = await tripService.getAllTrips();
+    return tripDtoList.map((dto) => dto.toTrip()).toList();
+  }
 }

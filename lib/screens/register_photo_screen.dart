@@ -70,12 +70,16 @@ class RegisterPhotoScreen extends StatelessWidget {
                     onPressed: () {
                       bool isDriver = selectedRole == "Driver";
 
-                      /*Navigator.pushReplacement(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => isDriver ? HomeDriverScreen(name: '', driverId: 0) : HomeParentScreen(onSeeMoreNotifications: () {  },),
+                          builder: (context) => isDriver
+                              ? HomeDriverScreen()
+                              : HomeParentScreen(
+                                  onSeeMoreNotifications: () {},
+                                  selectedIndex: 0),
                         ),
-                      );*/
+                      );
                     },
                     child: const Text(
                       'Next',
