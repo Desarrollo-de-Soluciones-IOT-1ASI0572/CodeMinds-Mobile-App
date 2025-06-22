@@ -7,7 +7,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'trip_map.dart';
 
 class PastTripsScreen extends StatefulWidget {
-  const PastTripsScreen({super.key});
+
+  final int driverId;
+  final String authToken;
+
+  const PastTripsScreen({super.key,  required this.driverId, required this.authToken});
 
   @override
   _PastTripsScreenState createState() => _PastTripsScreenState();
@@ -20,18 +24,20 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
   @override
   void initState() {
     super.initState();
-    tripService = TripService();
+    tripService = TripService(authToken: widget.authToken); // Pasar el token
     _tripLocationsCache = {};
   }
 
-  /*Future<List<Trip>> _getTrips() async {
-    final tripDTOs = await tripService.getAllTrips();
-    return tripDTOs.map((dto) => dto.toTrip()).toList();
-  }*/
-
   Future<List<Trip>> _getTrips() async {
-    final tripDTOs = await tripService.getCompletedTrips(); // Usa el nuevo método
-    return tripDTOs.map((dto) => dto.toTrip()).toList();
+    try {
+      final tripDTOs = await tripService.getCompletedTripsByDriver(widget.driverId);
+      return tripDTOs.map((dto) => dto.toTrip()).toList();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading trips: ${e.toString()}'))
+      );
+      return [];
+    }
   }
 
   Future<List<Location>> _getTripLocations(int tripId) async {

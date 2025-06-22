@@ -4,208 +4,139 @@ import 'package:codeminds_mobile_application/screens/tracking_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_bar_driver.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:codeminds_mobile_application/core/app_constants.dart';
 
 class AttendanceScreen extends StatefulWidget {
-  const AttendanceScreen({super.key});
+  final int driverId;
+  final String authToken;
+
+  const AttendanceScreen({
+    Key? key,
+    required this.driverId,
+    required this.authToken,
+  }) : super(key: key);
 
   @override
   _AttendanceScreenState createState() => _AttendanceScreenState();
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
-  final List<Map<String, dynamic>> students = [
-    {'name': 'Juan Pérez', 'image': 'assets/images/circle-user.png', 'status': ''},
-    {'name': 'Carlos Pérez', 'image': 'assets/images/circle-user.png', 'status': ''},
-    {'name': 'Jimena Pérez', 'image': 'assets/images/circle-user.png', 'status': ''},
-    {'name': 'Camila Pérez', 'image': 'assets/images/circle-user.png', 'status': ''},
-  ];
+  List<dynamic> students = [];
+  bool _isLoading = true;
+  bool _hasActiveTrip = false;
+  int? _activeTripId;
 
-  int _selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    _fetchActiveTrip();
+  }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  Future<void> _fetchActiveTrip() async {
+    setState(() => _isLoading = true);
 
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
-        break;
-      case 1:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const TrackingScreen()));
-        break;
-      case 2:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
-        break;
-      case 3:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));
-        break;
+    try {
+      final url = '${AppConstants.baseUrl}/vehicle-tracking/trips/active/driver/${widget.driverId}';
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${widget.authToken}',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data.isNotEmpty) {
+          setState(() {
+            _hasActiveTrip = true;
+            _activeTripId = data[0]['id'];
+            students = data[0]['students'] ?? [];
+          });
+        } else {
+          setState(() => _hasActiveTrip = false);
+        }
+      } else {
+        throw Exception('Failed to load active trip');
+      }
+    } catch (e) {
+      print('Error: $e');
+      // Manejar error
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Logo y título "Attendance"
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/CodeMinds-Logo.png',
-                    height: 50,
-                    width: 50,
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Attendance',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+  Widget _buildContent() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-              // Lista de estudiantes
-              Expanded(
-                child: ListView.builder(
-                  itemCount: students.length,
-                  itemBuilder: (context, index) {
-                    final student = students[index];
-                    return _buildStudentTile(student, index);
-                  },
-                ),
-              ),
+    if (!_hasActiveTrip) {
+      return const Center(
+        child: Text('No tienes viajes activos', style: TextStyle(fontSize: 18)),
+      );
+    }
 
-              const SizedBox(height: 16),
+    if (students.isEmpty) {
+      return const Center(
+        child: Text('No hay estudiantes en este viaje', style: TextStyle(fontSize: 18)),
+      );
+    }
 
-              // Botón "Load More"
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: () {},
-                  child: const Text(
-                    'Load More',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-
-      // **Footer de navegación exclusivo para conductores**
-      bottomNavigationBar: CustomBottomNavigationBarDriver(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
+    return ListView.builder(
+      itemCount: students.length,
+      itemBuilder: (context, index) {
+        final student = students[index];
+        return _buildStudentTile(student, index);
+      },
     );
   }
 
   Widget _buildStudentTile(Map<String, dynamic> student, int index) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                // Imagen del estudiante
-                CircleAvatar(
-                  radius: 40,
-                  backgroundImage: AssetImage(student['image']),
-                ),
-                const SizedBox(width: 12.0),
-
-                // Nombre del estudiante
-                Expanded(
-                  child: Text(
-                    student['name'],
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-
-                // Estado de asistencia resaltado
-                Text(
-                  student['status'],
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: student['status'] == 'Present' ? Colors.green : student['status'] == 'Absent' ? Colors.red : Colors.black,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-
-            // Botón "Manage Attendance"
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                onPressed: () => _showAttendanceModal(index),
-                child: const Text(
-                  'Manage Attendance',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundImage: NetworkImage(student['studentPhotoUrl']),
+        ),
+        title: Text('${student['name']} ${student['lastName']}'),
+        subtitle: Text(student['homeAddress']),
+        trailing: IconButton(
+          icon: Icon(student['attended'] == true
+              ? Icons.check_circle
+              : Icons.radio_button_unchecked,
+              color: student['attended'] == true ? Colors.green : Colors.grey),
+          onPressed: () => _toggleAttendance(index),
         ),
       ),
     );
   }
 
-  void _showAttendanceModal(int index) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Mark the Attendance'),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.check_circle, color: Colors.green, size: 50),
-                onPressed: () {
-                  setState(() {
-                    students[index]['status'] = 'Present';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(width: 20),
-              IconButton(
-                icon: const Icon(Icons.cancel, color: Colors.red, size: 50),
-                onPressed: () {
-                  setState(() {
-                    students[index]['status'] = 'Absent';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
+  void _toggleAttendance(int index) {
+    setState(() {
+      students[index]['attended'] = !(students[index]['attended'] == true);
+      // Aquí deberías llamar al endpoint para actualizar en backend
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Control de Asistencia'),
+        actions: [
+          if (_hasActiveTrip)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _fetchActiveTrip,
+            ),
+        ],
+      ),
+      body: _buildContent(),
     );
   }
 }

@@ -140,7 +140,7 @@ class _MapScreenState extends State<MapScreen> {
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
+              //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
               break;
             case 1:
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MapScreen()));

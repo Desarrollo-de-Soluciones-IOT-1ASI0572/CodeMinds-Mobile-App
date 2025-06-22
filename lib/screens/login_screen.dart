@@ -47,6 +47,9 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final String role = data['role'];
+        final int driverId = data['id'];
+        final String token = data['token']; // Añade esta línea
+
 
         // Navigate based on the role
         if (role == 'ROLE_PARENT') {
@@ -68,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomeDriverScreen(name: username),
+              builder: (context) => HomeDriverScreen(name: username, driverId: driverId, authToken: token,),
             ),
           );
         } else {
