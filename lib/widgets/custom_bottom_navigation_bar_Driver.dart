@@ -16,8 +16,10 @@ class CustomBottomNavigationBarDriver extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-        BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
-        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.notifications), label: 'Notifications'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle), label: 'Account'),
       ],
       currentIndex: currentIndex,
       selectedItemColor: Colors.blue,
