@@ -5,13 +5,10 @@ import 'package:codeminds_mobile_application/features/tracking/data/remote/trip_
 import 'package:codeminds_mobile_application/features/tracking/domain/trip.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'trip_map.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PastTripsScreen extends StatefulWidget {
-
-  final int driverId;
-  final String authToken;
-
-  const PastTripsScreen({super.key,  required this.driverId, required this.authToken});
+  const PastTripsScreen({super.key});
 
   @override
   _PastTripsScreenState createState() => _PastTripsScreenState();
@@ -24,18 +21,19 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
   @override
   void initState() {
     super.initState();
-    tripService = TripService(authToken: widget.authToken); // Pasar el token
+    tripService = TripService(); // Pasar el token
     _tripLocationsCache = {};
   }
 
   Future<List<Trip>> _getTrips() async {
+    final prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('user_id');
     try {
-      final tripDTOs = await tripService.getCompletedTripsByDriver(widget.driverId);
+      final tripDTOs = await tripService.getCompletedTripsByDriver(userId!);
       return tripDTOs.map((dto) => dto.toTrip()).toList();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading trips: ${e.toString()}'))
-      );
+          SnackBar(content: Text('Error loading trips: ${e.toString()}')));
       return [];
     }
   }
@@ -57,10 +55,8 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
   String _calculateAverageDuration(List<Trip> trips) {
     if (trips.isEmpty) return '0 mins';
 
-    final totalDuration = trips.fold(
-        Duration.zero,
-            (sum, trip) => sum + trip.endTime.difference(trip.startTime)
-    );
+    final totalDuration = trips.fold(Duration.zero,
+        (sum, trip) => sum + trip.endTime.difference(trip.startTime));
 
     final averageInMinutes = totalDuration.inMinutes ~/ trips.length;
 
@@ -106,8 +102,10 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
                               itemCount: trips.length,
                               itemBuilder: (context, index) {
                                 final trip = trips[index];
-                                final formattedDate = DateFormat('MMMM d, y').format(trip.startTime);
-                                return _buildTripCard(trip, formattedDate, index);
+                                final formattedDate = DateFormat('MMMM d, y')
+                                    .format(trip.startTime);
+                                return _buildTripCard(
+                                    trip, formattedDate, index);
                               },
                             ),
                           ),
@@ -118,9 +116,7 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
                             child: Text(
                               'Average Trip Duration: $averageDuration',
                               style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold
-                              ),
+                                  fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
 
@@ -132,20 +128,15 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                    horizontal: 32
-                                ),
+                                    vertical: 12, horizontal: 32),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)
-                                ),
+                                    borderRadius: BorderRadius.circular(8)),
                               ),
                               onPressed: () {},
                               child: const Text(
                                 'Load More',
                                 style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white
-                                ),
+                                    fontSize: 16, color: Colors.white),
                               ),
                             ),
                           ),
@@ -229,9 +220,8 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
   }
 
   void _editTripName(Trip trip, int index) {
-    final TextEditingController _titleController = TextEditingController(
-        text: "Trip ${trip.id}"
-    );
+    final TextEditingController _titleController =
+        TextEditingController(text: "Trip ${trip.id}");
 
     showDialog(
       context: context,
@@ -319,8 +309,7 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
         return AlertDialog(
           title: const Text('Delete Trip?'),
           content: const Text(
-              "This action cannot be undone. The trip data will be permanently deleted."
-          ),
+              "This action cannot be undone. The trip data will be permanently deleted."),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),

@@ -7,24 +7,72 @@ import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_ba
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:codeminds_mobile_application/core/app_constants.dart';
 
 class AttendanceScreen extends StatefulWidget {
-  final int driverId;
-  final String authToken;
-
-  const AttendanceScreen({
-    Key? key,
-    required this.driverId,
-    required this.authToken,
-  }) : super(key: key);
+  const AttendanceScreen({Key? key}) : super(key: key);
 
   @override
   _AttendanceScreenState createState() => _AttendanceScreenState();
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
+  List<dynamic> students = [];
+  bool _isLoading = true;
+  bool _hasActiveTrip = false;
+  int? _activeTripId;
+
+  int _selectedIndex = 0;
+
+  void _navigateToHomeDriver() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String userName = prefs.getString('user_name') ?? "Default Name";
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeDriverScreen(
+          name: userName,
+          selectedIndex: 0,
+        ),
+      ),
+    );
+  }
+
+  void _onNavTap(int index) {
+    if (_selectedIndex == index) return;
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        _navigateToHomeDriver();
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const TrackingScreen(selectedIndex: 1)),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const NotificationScreen(selectedIndex: 2)),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const AccountScreen(selectedIndex: 3)),
+        );
+        break;
+    }
+  }
 
   @override
   void initState() {
@@ -32,45 +80,20 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     _fetchActiveTrip();
   }
 
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const HomeDriverScreen(selectedIndex: 0)));
-        break;
-      case 1:
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const TrackingScreen(selectedIndex: 1)));
-        break;
-      case 2:
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const NotificationScreen(selectedIndex: 2)));
-        break;
-      case 3:
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const AccountScreen(selectedIndex: 3)));
-        break;
-    }
-  }
-
   Future<void> _fetchActiveTrip() async {
     setState(() => _isLoading = true);
 
+    final prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('user_id');
+    final String? token = prefs.getString('jwt_token');
+
     try {
-      final url = '${AppConstants.baseUrl}/vehicle-tracking/trips/active/driver/${widget.driverId}';
+      final url =
+          '${AppConstants.baseUrl}/vehicle-tracking/trips/active/driver/${userId!}';
       final response = await http.get(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer ${widget.authToken}',
+          'Authorization': 'Bearer ${token!}',
           'Content-Type': 'application/json',
         },
       );
@@ -110,7 +133,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     if (students.isEmpty) {
       return const Center(
-        child: Text('No hay estudiantes en este viaje', style: TextStyle(fontSize: 18)),
+        child: Text('No hay estudiantes en este viaje',
+            style: TextStyle(fontSize: 18)),
       );
     }
 
@@ -132,9 +156,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         title: Text('${student['name']} ${student['lastName']}'),
         subtitle: Text(student['homeAddress']),
         trailing: IconButton(
-          icon: Icon(student['attended'] == true
-              ? Icons.check_circle
-              : Icons.radio_button_unchecked,
+          icon: Icon(
+              student['attended'] == true
+                  ? Icons.check_circle
+                  : Icons.radio_button_unchecked,
               color: student['attended'] == true ? Colors.green : Colors.grey),
           onPressed: () => _toggleAttendance(index),
         ),
@@ -165,7 +190,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       body: _buildContent(),
       bottomNavigationBar: CustomBottomNavigationBarDriver(
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        onTap: _onNavTap,
       ),
     );
   }

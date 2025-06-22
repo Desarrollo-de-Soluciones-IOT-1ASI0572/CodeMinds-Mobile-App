@@ -9,17 +9,14 @@ import 'package:http/http.dart' as http;
 import 'package:codeminds_mobile_application/core/app_constants.dart';
 
 import 'ActiveTripDTO.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TripService {
-
-  late final String? authToken;
-
-  TripService({this.authToken});
-
-  Map<String, String> _getHeaders() {
+  Future<Map<String, String>> _getHeaders() async {
+    String? token = await getToken();
     return {
       'Content-Type': 'application/json',
-      if (authToken != null) 'Authorization': 'Bearer $authToken',
+      if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
@@ -40,12 +37,14 @@ class TripService {
   }
 
   Future<List<Location>> getTripLocations(int tripId) async {
-    final url = '${AppConstants.baseUrl}/vehicle-tracking/locations/trip/$tripId';
+    final url =
+        '${AppConstants.baseUrl}/vehicle-tracking/locations/trip/$tripId';
     debugPrint('🔍 Llamando a: $url');
 
     try {
       // ✅ Asegúrate de pasar el token en los headers
-      http.Response response = await http.get(Uri.parse(url), headers: _getHeaders());
+      http.Response response =
+          await http.get(Uri.parse(url), headers: await _getHeaders());
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> jsonResponse = json.decode(response.body);
@@ -54,7 +53,8 @@ class TripService {
             .map((model) => Location.fromDTO(LocationDTO.fromJson(model)))
             .toList();
 
-        debugPrint('📦 ${locations.length} ubicaciones recibidas para tripId=$tripId');
+        debugPrint(
+            '📦 ${locations.length} ubicaciones recibidas para tripId=$tripId');
 
         for (var loc in locations) {
           debugPrint('📍 ${loc.latitude}, ${loc.longitude}');
@@ -63,7 +63,8 @@ class TripService {
         return locations;
       }
 
-      debugPrint('⚠️ Respuesta no OK (${response.statusCode}) para tripId=$tripId');
+      debugPrint(
+          '⚠️ Respuesta no OK (${response.statusCode}) para tripId=$tripId');
       return [];
     } catch (e) {
       debugPrint('❌ Error al obtener ubicaciones para tripId=$tripId: $e');
@@ -71,12 +72,11 @@ class TripService {
     }
   }
 
-
-
   Future<Map<String, dynamic>?> getCurrentVehicleLocation(int studentId) async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/vehicle-tracking/students/$studentId/current-vehicle-location'),
+        Uri.parse(
+            '${AppConstants.baseUrl}/vehicle-tracking/students/$studentId/current-vehicle-location'),
       );
 
       if (response.statusCode == 200) {
@@ -90,13 +90,14 @@ class TripService {
   }
 
   Future<List<TripDTO>> getCompletedTripsByDriver(int driverId) async {
-    final url = '${AppConstants.baseUrl}${AppConstants.completedTripsByDriverEndpoint}/$driverId';
+    final url =
+        '${AppConstants.baseUrl}${AppConstants.completedTripsByDriverEndpoint}/$driverId';
     debugPrint('🌐 Calling: $url');
 
     try {
       final response = await http.get(
         Uri.parse(url),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
       );
 
       if (response.statusCode == HttpStatus.ok) {
@@ -104,7 +105,8 @@ class TripService {
         return data.map((json) => TripDTO.fromJson(json)).toList();
       }
       debugPrint('⚠️ Error ${response.statusCode}: ${response.body}');
-      throw Exception('Failed to load trips. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load trips. Status code: ${response.statusCode}');
     } catch (e) {
       debugPrint('❌ Error in getCompletedTripsByDriver: $e');
       throw Exception('Failed to load trips: $e');
@@ -112,21 +114,24 @@ class TripService {
   }
 
   Future<List<Map<String, dynamic>>> getTripStudents(int tripId) async {
-    final url = '${AppConstants.baseUrl}/vehicle-tracking/trips/$tripId/students';
+    final url =
+        '${AppConstants.baseUrl}/vehicle-tracking/trips/$tripId/students';
     debugPrint('📘 Llamando a: $url');
 
     try {
       final response = await http.get(
         Uri.parse(url),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
       );
 
       if (response.statusCode == HttpStatus.ok) {
         final List<dynamic> data = jsonDecode(response.body);
-        debugPrint('✅ ${data.length} estudiantes recibidos para tripId=$tripId');
+        debugPrint(
+            '✅ ${data.length} estudiantes recibidos para tripId=$tripId');
         return data.cast<Map<String, dynamic>>();
       } else {
-        debugPrint('⚠️ Respuesta no OK (${response.statusCode}) al obtener estudiantes');
+        debugPrint(
+            '⚠️ Respuesta no OK (${response.statusCode}) al obtener estudiantes');
         return [];
       }
     } catch (e) {
@@ -136,13 +141,14 @@ class TripService {
   }
 
   Future<List<ActiveTripDTO>> getActiveTripByDriver(int driverId) async {
-    final url = '${AppConstants.baseUrl}/vehicle-tracking/trips/active/driver/$driverId';
+    final url =
+        '${AppConstants.baseUrl}/vehicle-tracking/trips/active/driver/$driverId';
     debugPrint('🌐 Calling active trip endpoint: $url');
 
     try {
       final response = await http.get(
         Uri.parse(url),
-        headers: _getHeaders(),
+        headers: await _getHeaders(),
       );
 
       if (response.statusCode == HttpStatus.ok) {
@@ -152,12 +158,17 @@ class TripService {
         return []; // Retorna lista vacía si no hay viaje activo
       } else {
         debugPrint('⚠️ Error ${response.statusCode}: ${response.body}');
-        throw Exception('Failed to load active trip. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to load active trip. Status code: ${response.statusCode}');
       }
     } catch (e) {
       debugPrint('❌ Error in getActiveTripByDriver: $e');
       throw Exception('Failed to load active trip: $e');
     }
   }
-}
 
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('jwt_token');
+  }
+}

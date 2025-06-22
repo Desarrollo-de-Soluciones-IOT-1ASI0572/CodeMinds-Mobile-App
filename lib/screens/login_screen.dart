@@ -82,7 +82,8 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomeDriverScreen(name: username, driverId: driverId, authToken: token,),
+              builder: (context) =>
+                  HomeDriverScreen(name: username, selectedIndex: 0),
             ),
           );
         } else {
