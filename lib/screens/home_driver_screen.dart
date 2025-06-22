@@ -13,9 +13,16 @@ import '../widgets/custom_bottom_navigation_bar_Driver.dart'; // si hay
 class HomeDriverScreen extends StatefulWidget {
   final String name;
   final int selectedIndex;
+  final int driverId;
+  final String authToken;
 
-  const HomeDriverScreen(
-      {super.key, this.name = "Default Name", this.selectedIndex = 0});
+  const HomeDriverScreen({
+    super.key,
+    required this.name,
+    required this.driverId,
+    required this.authToken,
+    required this.selectedIndex
+  });
 
   @override
   State<HomeDriverScreen> createState() => _HomeDriverScreenState();
@@ -32,10 +39,10 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacement(
+        /*Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeDriverScreen()),
-        );
+        );*/
         break;
       case 1:
         Navigator.pushReplacement(
@@ -136,8 +143,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                  builder: (_) => const PastTripsScreen()),
+                              MaterialPageRoute(builder: (_) => PastTripsScreen(driverId: widget.driverId, authToken: widget.authToken)),
                             );
                           },
                           child: Image.asset(
@@ -162,7 +168,11 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => const AttendanceScreen()),
+                                builder: (_) => AttendanceScreen(
+                                  driverId: widget.driverId,
+                                  authToken: widget.authToken,
+                                ),
+                              ),
                             );
                           },
                           child: Image.asset(
