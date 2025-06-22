@@ -1,10 +1,19 @@
+import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
+import 'package:codeminds_mobile_application/screens/home_parent_screen.dart';
+import 'package:codeminds_mobile_application/screens/map_screen.dart';
+import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_bar.dart';
+import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_bar_driver.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:codeminds_mobile_application/features/notification/data/remote/notification_service.dart';
 import 'package:codeminds_mobile_application/features/notification/data/repository/notification_repository.dart';
 import 'package:codeminds_mobile_application/features/notification/domain/notification.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:codeminds_mobile_application/screens/account_screen.dart';
+import 'package:codeminds_mobile_application/screens/tracking_screen.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  final int selectedIndex;
+  const NotificationScreen({super.key, required this.selectedIndex});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -13,23 +22,102 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   List<Notification> _notifications = [];
 
-  // userId
-  int userId = 1;
+  String _role = "";
 
-  Future<void> _loadData() async {
-    List<Notification> notifications = await NotificationRepository(
-      notificationService: NotificationService(),
-    ).getNotificationsByUserId(userId);
+  int _selectedIndex = 0;
 
+  void _navigateToHomeParent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String userName = prefs.getString('user_name') ?? "Default Name";
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeParentScreen(
+          name: userName,
+          onSeeMoreNotifications: () {},
+          selectedIndex: 0,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToHomeDriver() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String userName = prefs.getString('user_name') ?? "Default Name";
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            HomeDriverScreen(name: userName, selectedIndex: 0),
+      ),
+    );
+  }
+
+  void _onNavTap(int index) {
+    if (_selectedIndex == index) return;
     setState(() {
-      _notifications = notifications;
+      _selectedIndex = index;
     });
+
+    switch (index) {
+      case 0:
+        if (_role == "ROLE_PARENT") {
+          _navigateToHomeParent();
+        } else if (_role == "ROLE_DRIVER") {
+          _navigateToHomeDriver();
+        }
+        break;
+      case 1:
+        if (_role == "ROLE_PARENT") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const TrackingScreen(selectedIndex: 1)),
+          );
+        } else if (_role == "ROLE_DRIVER") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MapScreen()),
+          );
+        }
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const NotificationScreen(selectedIndex: 2)),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const AccountScreen(selectedIndex: 3)),
+        );
+        break;
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.selectedIndex;
     _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('user_id');
+    final String role = prefs.getString('role')!;
+
+    List<Notification> notifications = await NotificationRepository(
+      notificationService: NotificationService(),
+    ).getNotificationsByUserId(userId!);
+
+    setState(() {
+      _notifications = notifications;
+      _role = role;
+    });
   }
 
   @override
@@ -67,6 +155,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
           );
         },
       ),
+      bottomNavigationBar: _role == "ROLE_PARENT"
+          ? CustomBottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: _onNavTap,
+            )
+          : _role == "ROLE_DRIVER"
+              ? CustomBottomNavigationBarDriver(
+                  currentIndex: _selectedIndex,
+                  onTap: _onNavTap,
+                )
+              : null,
     );
   }
 }

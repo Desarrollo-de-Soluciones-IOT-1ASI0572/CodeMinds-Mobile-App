@@ -4,9 +4,11 @@ import 'package:latlong2/latlong.dart';
 import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final int selectedIndex;
+  const MapScreen({super.key, this.selectedIndex = 1});
 
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -14,6 +16,18 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   String selectedRoute = 'Route A';
+
+  void _navigateToHomeDriver() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String userName = prefs.getString('user_name') ?? "Default Name";
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            HomeDriverScreen(name: userName, selectedIndex: 0),
+      ),
+    );
+  }
 
   final Map<String, Map<String, dynamic>> routeData = {
     'Route A': {
@@ -70,7 +84,8 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   children: [
                     TileLayer(
-                      urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      urlTemplate:
+                          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                       subdomains: const ['a', 'b', 'c'],
                     ),
                   ],
@@ -89,7 +104,8 @@ class _MapScreenState extends State<MapScreen> {
                       selectedRoute = newValue!;
                     });
                   },
-                  items: routeData.keys.map<DropdownMenuItem<String>>((String key) {
+                  items: routeData.keys
+                      .map<DropdownMenuItem<String>>((String key) {
                     return DropdownMenuItem<String>(
                       value: key,
                       child: Text(key),
@@ -97,9 +113,12 @@ class _MapScreenState extends State<MapScreen> {
                   }).toList(),
                 ),
               ),
-              _buildInfoRow('Location:', Text(routeData[selectedRoute]!['location'])),
-              _buildInfoRow('Status:', Text(routeData[selectedRoute]!['status'])),
-              _buildInfoRow('Distance(Km):', Text(routeData[selectedRoute]!['distance'])),
+              _buildInfoRow(
+                  'Location:', Text(routeData[selectedRoute]!['location'])),
+              _buildInfoRow(
+                  'Status:', Text(routeData[selectedRoute]!['status'])),
+              _buildInfoRow(
+                  'Distance(Km):', Text(routeData[selectedRoute]!['distance'])),
 
               const SizedBox(height: 12),
 
@@ -110,7 +129,8 @@ class _MapScreenState extends State<MapScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () {
                     // Acción de emergencia
@@ -131,8 +151,10 @@ class _MapScreenState extends State<MapScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.notifications), label: 'Notifications'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle), label: 'Account'),
         ],
         currentIndex: 1,
         selectedItemColor: Colors.blue,
@@ -140,16 +162,25 @@ class _MapScreenState extends State<MapScreen> {
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
+              _navigateToHomeDriver();
               break;
             case 1:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MapScreen()));
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => const MapScreen()));
               break;
             case 2:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          const NotificationScreen(selectedIndex: 2)));
               break;
             case 3:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          const AccountScreen(selectedIndex: 3)));
               break;
           }
         },

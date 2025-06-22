@@ -10,11 +10,12 @@ import 'package:codeminds_mobile_application/screens/map_screen.dart';
 
 import '../widgets/custom_bottom_navigation_bar_Driver.dart'; // si hay
 
-
 class HomeDriverScreen extends StatefulWidget {
   final String name;
+  final int selectedIndex;
 
-  const HomeDriverScreen({super.key, this.name = "Default Name"});
+  const HomeDriverScreen(
+      {super.key, this.name = "Default Name", this.selectedIndex = 0});
 
   @override
   State<HomeDriverScreen> createState() => _HomeDriverScreenState();
@@ -39,19 +40,23 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
       case 1:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MapScreen()), // si tienes pantalla de mapa
+          MaterialPageRoute(
+              builder: (context) =>
+                  const MapScreen()), // si tienes pantalla de mapa
         );
         break;
       case 2:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const NotificationScreen()),
+          MaterialPageRoute(
+              builder: (context) => const NotificationScreen(selectedIndex: 2)),
         );
         break;
       case 3:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const AccountScreen()),
+          MaterialPageRoute(
+              builder: (context) => const AccountScreen(selectedIndex: 3)),
         );
         break;
     }
@@ -60,7 +65,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFE3F2FD),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -106,7 +111,8 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                       const SizedBox(height: 8),
                       const Text(
                         'Emergency Button',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -122,14 +128,16 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                       children: [
                         const Text(
                           'Past Trips',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => const PastTripsScreen()),
+                              MaterialPageRoute(
+                                  builder: (_) => const PastTripsScreen()),
                             );
                           },
                           child: Image.asset(
@@ -145,14 +153,16 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                       children: [
                         const Text(
                           'Attendance',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => const AttendanceScreen()),
+                              MaterialPageRoute(
+                                  builder: (_) => const AttendanceScreen()),
                             );
                           },
                           child: Image.asset(
@@ -177,7 +187,8 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                     ),
                     children: [
                       TileLayer(
-                        urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        urlTemplate:
+                            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                         subdomains: ['a', 'b', 'c'],
                       ),
                       MarkerLayer(

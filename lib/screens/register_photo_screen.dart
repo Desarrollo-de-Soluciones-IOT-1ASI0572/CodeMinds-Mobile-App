@@ -47,11 +47,12 @@ class RegisterPhotoScreen extends StatelessWidget {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2563EB),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 32),
                     ),
-                    onPressed: () {
-                    },
+                    onPressed: () {},
                     child: const Text(
                       'Upload',
                       style: TextStyle(fontSize: 16, color: Colors.white),
@@ -61,8 +62,10 @@ class RegisterPhotoScreen extends StatelessWidget {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFA0A0A0),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 32),
                     ),
                     onPressed: () {
                       bool isDriver = selectedRole == "Driver";
@@ -70,7 +73,11 @@ class RegisterPhotoScreen extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => isDriver ? HomeDriverScreen() : HomeParentScreen(onSeeMoreNotifications: () {  },),
+                          builder: (context) => isDriver
+                              ? HomeDriverScreen()
+                              : HomeParentScreen(
+                                  onSeeMoreNotifications: () {},
+                                  selectedIndex: 0),
                         ),
                       );
                     },

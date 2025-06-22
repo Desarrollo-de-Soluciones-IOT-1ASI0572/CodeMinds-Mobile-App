@@ -28,10 +28,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _screens = [
-      HomeParentScreen(onSeeMoreNotifications: () => _onItemTapped(2)),
-      const TrackingScreen(),
-      const NotificationScreen(),
-      const AccountScreen(),
+      HomeParentScreen(
+          onSeeMoreNotifications: () => _onItemTapped(2), selectedIndex: 0),
+      const TrackingScreen(selectedIndex: 1),
+      const NotificationScreen(selectedIndex: 2),
+      const AccountScreen(selectedIndex: 3),
       const ChildrenScreen()
     ];
 

@@ -14,10 +14,26 @@ class AttendanceScreen extends StatefulWidget {
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
   final List<Map<String, dynamic>> students = [
-    {'name': 'Juan Pérez', 'image': 'assets/images/circle-user.png', 'status': ''},
-    {'name': 'Carlos Pérez', 'image': 'assets/images/circle-user.png', 'status': ''},
-    {'name': 'Jimena Pérez', 'image': 'assets/images/circle-user.png', 'status': ''},
-    {'name': 'Camila Pérez', 'image': 'assets/images/circle-user.png', 'status': ''},
+    {
+      'name': 'Juan Pérez',
+      'image': 'assets/images/circle-user.png',
+      'status': ''
+    },
+    {
+      'name': 'Carlos Pérez',
+      'image': 'assets/images/circle-user.png',
+      'status': ''
+    },
+    {
+      'name': 'Jimena Pérez',
+      'image': 'assets/images/circle-user.png',
+      'status': ''
+    },
+    {
+      'name': 'Camila Pérez',
+      'image': 'assets/images/circle-user.png',
+      'status': ''
+    },
   ];
 
   int _selectedIndex = 0;
@@ -29,16 +45,30 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeDriverScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    const HomeDriverScreen(selectedIndex: 0)));
         break;
       case 1:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const TrackingScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const TrackingScreen(selectedIndex: 1)));
         break;
       case 2:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    const NotificationScreen(selectedIndex: 2)));
         break;
       case 3:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const AccountScreen(selectedIndex: 3)));
         break;
     }
   }
@@ -89,8 +119,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 32),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () {},
                   child: const Text(
@@ -134,7 +166,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 Expanded(
                   child: Text(
                     student['name'],
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
 
@@ -144,7 +177,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: student['status'] == 'Present' ? Colors.green : student['status'] == 'Absent' ? Colors.red : Colors.black,
+                    color: student['status'] == 'Present'
+                        ? Colors.green
+                        : student['status'] == 'Absent'
+                            ? Colors.red
+                            : Colors.black,
                   ),
                 ),
               ],
@@ -159,7 +196,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () => _showAttendanceModal(index),
                 child: const Text(
@@ -184,7 +222,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.check_circle, color: Colors.green, size: 50),
+                icon: const Icon(Icons.check_circle,
+                    color: Colors.green, size: 50),
                 onPressed: () {
                   setState(() {
                     students[index]['status'] = 'Present';

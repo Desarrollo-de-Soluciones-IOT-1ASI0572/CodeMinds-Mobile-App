@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:codeminds_mobile_application/screens/main_screen.dart';
 import 'package:codeminds_mobile_application/screens/register_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_constants.dart';
 
@@ -47,6 +48,15 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final String role = data['role'];
+        final String token = data['token'];
+        final int userId = data['id'];
+        final String username = data['username'];
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('jwt_token', token);
+        await prefs.setInt('user_id', userId);
+        await prefs.setString('role', role);
+        await prefs.setString('user_name', username);
 
         // Navigate based on the role
         if (role == 'ROLE_PARENT') {
@@ -58,9 +68,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 onSeeMoreNotifications: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const NotificationScreen(selectedIndex: 2)),
                   );
                 },
+                selectedIndex: 0,
               ),
             ),
           );
@@ -175,7 +188,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text.rich(
                     TextSpan(
                       text: "Don't have an account? ",
-                      style: const TextStyle(fontSize: 16.0, color: Colors.black54),
+                      style: const TextStyle(
+                          fontSize: 16.0, color: Colors.black54),
                       children: [
                         TextSpan(
                           text: 'Register',
@@ -189,7 +203,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const RoleSelectionScreen(),
+                                  builder: (context) =>
+                                      const RoleSelectionScreen(),
                                 ),
                               );
                             },
