@@ -1,3 +1,5 @@
+import 'package:codeminds_mobile_application/features/student/data/remote/student.dart';
+import 'package:codeminds_mobile_application/features/student/data/remote/student_service.dart';
 import 'package:codeminds_mobile_application/screens/home_driver_screen.dart';
 import 'package:codeminds_mobile_application/screens/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
@@ -17,28 +19,46 @@ class TrackingScreen extends StatefulWidget {
 }
 
 class _TrackingScreenState extends State<TrackingScreen> {
-  String selectedKid = 'Juan Pérez';
+ StudentModel? selectedStudent;
+  List<StudentModel> students = [];
+  bool isLoading = true;
+  String? errorMessage;
+  
+  // Instancia del servicio
+  final StudentService _studentService = StudentService();
 
-  final Map<String, Map<String, dynamic>> kidData = {
-    'Juan Pérez': {
-      'location': 'Av. Primavera 123',
-      'status': 'En camino',
-      'distance': '2.4 km',
-      'speed': '15 km/h',
-    },
-    'María López': {
-      'location': 'Calle Los Olivos 456',
-      'status': 'En casa',
-      'distance': '0 km',
-      'speed': '0 km/h',
-    },
-    'Carlos Gómez': {
-      'location': 'Jr. San Martín 789',
-      'status': 'En la escuela',
-      'distance': '5.8 km',
-      'speed': '20 km/h',
-    },
-  };
+  Future<void> _loadStudents() async {
+    try {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+
+      final prefs = await SharedPreferences.getInstance();
+      final int? parentUserId = prefs.getInt('user_id');
+      
+      if (parentUserId == null) {
+        throw Exception('ID de usuario padre no encontrado');
+      }
+
+      final loadedStudents = await _studentService.getStudentsByParentUserId(parentUserId);
+
+      print('Estudiantes cargados: ${loadedStudents.length}');
+      
+      setState(() {
+        students = loadedStudents;
+        if (students.isNotEmpty) {
+          selectedStudent = students.first;
+        }
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error al cargar estudiantes: $e';
+        isLoading = false;
+      });
+    }
+  }
 
   int _selectedIndex = 0;
 
@@ -94,6 +114,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   @override
   void initState() {
     super.initState();
+    _loadStudents();
     _selectedIndex = widget.selectedIndex;
   }
 
@@ -145,29 +166,28 @@ class _TrackingScreenState extends State<TrackingScreen> {
               children: [
                 buildInfoRow(
                   'Select Kid:',
-                  DropdownButton<String>(
-                    value: selectedKid,
-                    onChanged: (String? newValue) {
+                  DropdownButton<StudentModel>(
+                    value: selectedStudent,
+                    isExpanded: true,
+                    onChanged: (StudentModel? newValue) {
                       setState(() {
-                        selectedKid = newValue!;
+                        selectedStudent = newValue!;
                       });
                     },
-                    items: kidData.keys
-                        .map<DropdownMenuItem<String>>((String key) {
-                      return DropdownMenuItem<String>(
-                        value: key,
-                        child: Text(key),
-                      );
-                    }).toList(),
+                    items: students.map<DropdownMenuItem<StudentModel>>((StudentModel student) {
+              return DropdownMenuItem<StudentModel>(
+                value: student,
+                child: Text('${student.name} ${student.lastName}'),
+              );
+            }).toList(),
                   ),
                 ),
-                buildInfoRow(
-                    'Location:', Text(kidData[selectedKid]!['location'])),
-                buildInfoRow('Status:', Text(kidData[selectedKid]!['status'])),
-                buildInfoRow(
-                    'Distance(Km):', Text(kidData[selectedKid]!['distance'])),
-                buildInfoRow(
-                    'Speed(km/h):', Text(kidData[selectedKid]!['speed'])),
+                if (selectedStudent != null) ...[
+                    // Datos de tracking simulados (puedes reemplazar con datos reales más adelante)
+                    buildInfoRow('Estado:', const Text('En camino')),
+                    buildInfoRow('Distancia(Km):', const Text('2.4 km')),
+                    buildInfoRow('Velocidad(km/h):', const Text('15 km/h')),
+                  ],
               ],
             ),
           ),
