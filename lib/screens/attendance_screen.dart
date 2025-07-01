@@ -4,12 +4,9 @@ import 'package:codeminds_mobile_application/screens/tracking_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_bar_driver.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:codeminds_mobile_application/core/app_constants.dart';
+import 'package:codeminds_mobile_application/features/tracking/data/remote/trip_service.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({Key? key}) : super(key: key);
@@ -19,16 +16,132 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
-  List<dynamic> students = [];
+  List<Map<String, dynamic>> students = [];
   bool _isLoading = true;
   bool _hasActiveTrip = false;
   int? _activeTripId;
-
   int _selectedIndex = 0;
+  final TripService _tripService = TripService();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchActiveTrip();
+  }
+
+  Future<void> _fetchActiveTrip() async {
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('user_id');
+
+    try {
+      final activeTrips = await _tripService.getActiveTripByDriver(userId!);
+      if (activeTrips.isNotEmpty) {
+        setState(() {
+          _hasActiveTrip = true;
+          _activeTripId = activeTrips.first.id;
+        });
+        _loadStudents();
+      } else {
+        setState(() => _hasActiveTrip = false);
+      }
+    } catch (e) {
+      print('Error: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadStudents() async {
+    if (_activeTripId == null) return;
+    setState(() => _isLoading = true);
+    try {
+      final studentsList = await _tripService.getTripStudents(_activeTripId!);
+      setState(() => students = studentsList);
+    } catch (e) {
+      print('Error: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Widget _buildContent() {
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (!_hasActiveTrip) return const Center(child: Text('No tienes viajes activos', style: TextStyle(fontSize: 18)));
+    if (students.isEmpty) return const Center(child: Text('No hay estudiantes en este viaje', style: TextStyle(fontSize: 18)));
+
+    return ListView.builder(
+      itemCount: students.length,
+      itemBuilder: (context, index) => _buildStudentTile(students[index]),
+    );
+  }
+
+  Widget _buildStudentTile(Map<String, dynamic> studentData) {
+    final student = studentData['student'];
+    final status = _determineStatus(studentData);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundImage: _getStudentImage(student['studentPhotoUrl']),
+        ),
+        title: Text('${student['name']} ${student['lastName']}'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('📍 ${student['homeAddress']}'),
+            Text('Estado: ${status['text']}', style: TextStyle(color: status['color'])),
+            if (status['time'] != null) Text('🕒 ${status['time']}'),
+          ],
+        ),
+        trailing: Icon(
+          status['icon'],
+          color: status['color'],
+        ),
+      ),
+    );
+  }
+
+  Map<String, dynamic> _determineStatus(Map<String, dynamic> student) {
+    if (student['exitedAt'] != null) {
+      return {
+        'text': 'Finalizado',
+        'color': Colors.blue,
+        'time': _formatTime(student['exitedAt']),
+        'icon': Icons.check_circle
+      };
+    } else if (student['boardedAt'] != null) {
+      return {
+        'text': 'A bordo',
+        'color': Colors.green,
+        'time': _formatTime(student['boardedAt']),
+        'icon': Icons.directions_bus
+      };
+    } else {
+      return {
+        'text': 'Pendiente',
+        'color': Colors.orange,
+        'time': null,
+        'icon': Icons.pending
+      };
+    }
+  }
+
+  String _formatTime(String? timestamp) {
+    if (timestamp == null) return '';
+    return timestamp.substring(11, 16);
+  }
+
+  ImageProvider _getStudentImage(String photoUrl) {
+    return photoUrl.startsWith('http')
+        ? NetworkImage(photoUrl)
+        : const AssetImage('assets/default_avatar.png');
+  }
 
   void _navigateToHomeDriver() async {
     final prefs = await SharedPreferences.getInstance();
-    final String userName = prefs.getString('user_name') ?? "Default Name";
+    final userName = prefs.getString('user_name') ?? "Default Name";
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -42,136 +155,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   void _onNavTap(int index) {
     if (_selectedIndex == index) return;
-    setState(() {
-      _selectedIndex = index;
-    });
-
+    setState(() => _selectedIndex = index);
     switch (index) {
-      case 0:
-        _navigateToHomeDriver();
-        break;
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const TrackingScreen(selectedIndex: 1)),
-        );
-        break;
-      case 2:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const NotificationScreen(selectedIndex: 2)),
-        );
-        break;
-      case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const AccountScreen(selectedIndex: 3)),
-        );
-        break;
+      case 0: _navigateToHomeDriver(); break;
+      case 1: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const TrackingScreen(selectedIndex: 1))); break;
+      case 2: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen(selectedIndex: 2))); break;
+      case 3: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen(selectedIndex: 3))); break;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchActiveTrip();
-  }
-
-  Future<void> _fetchActiveTrip() async {
-    setState(() => _isLoading = true);
-
-    final prefs = await SharedPreferences.getInstance();
-    final int? userId = prefs.getInt('user_id');
-    final String? token = prefs.getString('jwt_token');
-
-    try {
-      final url =
-          '${AppConstants.baseUrl}/vehicle-tracking/trips/active/driver/${userId!}';
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer ${token!}',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data.isNotEmpty) {
-          setState(() {
-            _hasActiveTrip = true;
-            _activeTripId = data[0]['id'];
-            students = data[0]['students'] ?? [];
-          });
-        } else {
-          setState(() => _hasActiveTrip = false);
-        }
-      } else {
-        throw Exception('Failed to load active trip');
-      }
-    } catch (e) {
-      print('Error: $e');
-      // Manejar error
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Widget _buildContent() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (!_hasActiveTrip) {
-      return const Center(
-        child: Text('No tienes viajes activos', style: TextStyle(fontSize: 18)),
-      );
-    }
-
-    if (students.isEmpty) {
-      return const Center(
-        child: Text('No hay estudiantes en este viaje',
-            style: TextStyle(fontSize: 18)),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: students.length,
-      itemBuilder: (context, index) {
-        final student = students[index];
-        return _buildStudentTile(student, index);
-      },
-    );
-  }
-
-  Widget _buildStudentTile(Map<String, dynamic> student, int index) {
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: NetworkImage(student['studentPhotoUrl']),
-        ),
-        title: Text('${student['name']} ${student['lastName']}'),
-        subtitle: Text(student['homeAddress']),
-        trailing: IconButton(
-          icon: Icon(
-              student['attended'] == true
-                  ? Icons.check_circle
-                  : Icons.radio_button_unchecked,
-              color: student['attended'] == true ? Colors.green : Colors.grey),
-          onPressed: () => _toggleAttendance(index),
-        ),
-      ),
-    );
-  }
-
-  void _toggleAttendance(int index) {
-    setState(() {
-      students[index]['attended'] = !(students[index]['attended'] == true);
-      // Aquí deberías llamar al endpoint para actualizar en backend
-    });
   }
 
   @override
