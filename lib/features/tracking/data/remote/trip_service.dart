@@ -20,6 +20,43 @@ class TripService {
     };
   }
 
+  Future<int?> createTrip({
+    required int vehicleId,
+    required int driverId,
+    required String origin,
+    required String destination,
+  }) async {
+    final url = '${AppConstants.baseUrl}${AppConstants.tripsEndpoint}';
+    debugPrint('🚀 Creando viaje en: $url');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'vehicleId': vehicleId,
+          'driverId': driverId,
+          'origin': origin,
+          'destination': destination,
+        }),
+      );
+
+      debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.created) {
+        final tripData = jsonDecode(response.body);
+        debugPrint('✅ Viaje creado: ID ${tripData['id']}');
+        return tripData['id'];
+      } else {
+        debugPrint('⚠️ Error ${response.statusCode}: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ Error al crear viaje: $e');
+      return null;
+    }
+  }
+
   Future<bool> deleteTrip(int tripId) async {
     final url = '${AppConstants.baseUrl}${AppConstants.tripsEndpoint}/$tripId';
 
@@ -113,7 +150,7 @@ class TripService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getTripStudents(int tripId) async {
+  /*Future<List<Map<String, dynamic>>> getTripStudents(int tripId) async {
     final url =
         '${AppConstants.baseUrl}/vehicle-tracking/trips/$tripId/students';
     debugPrint('📘 Llamando a: $url');
@@ -136,6 +173,30 @@ class TripService {
       }
     } catch (e) {
       debugPrint('❌ Error al obtener estudiantes del viaje $tripId: $e');
+      return [];
+    }
+  }*/
+
+  Future<List<Map<String, dynamic>>> getTripStudents(int tripId) async {
+    final url = '${AppConstants.baseUrl}${AppConstants.tripStudentsEndpoint}/$tripId/students';
+    debugPrint('📘 Llamando a: $url');
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        final List<dynamic> data = jsonDecode(response.body);
+        debugPrint('✅ ${data.length} estudiantes recibidos para tripId=$tripId');
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        debugPrint('⚠️ Error ${response.statusCode}: ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('❌ Error al obtener estudiantes: $e');
       return [];
     }
   }
@@ -171,4 +232,83 @@ class TripService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('jwt_token');
   }
+
+  Future<bool> startTrip(int tripId) async {
+    final url = '${AppConstants.baseUrl}/vehicle-tracking/routes/start';
+    debugPrint('🚦 Intentando iniciar viaje ID: $tripId en $url');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+        body: jsonEncode({'tripId': tripId}),
+      );
+
+      debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.created) {
+        debugPrint('✅ Viaje $tripId iniciado con éxito. Estado: ${jsonDecode(response.body)['status']}');
+        return true;
+      } else {
+        debugPrint('❌ Error al iniciar viaje. Código: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ Excepción al iniciar viaje: $e');
+      return false;
+    }
+  }
+
+  Future<bool> endTrip(int tripId) async {
+    final url = '${AppConstants.baseUrl}${AppConstants.endTripEndpoint}';
+    debugPrint('🛑 Intentando finalizar viaje ID: $tripId en $url');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+        body: jsonEncode({'tripId': tripId}),
+      );
+
+      debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.accepted) {
+        debugPrint('✅ Viaje $tripId finalizado correctamente');
+        return true;
+      } else {
+        debugPrint('❌ Error al finalizar viaje. Código: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ Excepción al finalizar viaje: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateStudentAttendance({
+    required int tripId,
+    required int studentId,
+    required bool attended,
+    DateTime? boardedAt,
+    DateTime? exitedAt,
+  }) async {
+    final url = '${AppConstants.baseUrl}${AppConstants.tripStudentsEndpoint}/$tripId/students/$studentId';
+    try {
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'attended': attended,
+          if (boardedAt != null) 'boardedAt': boardedAt.toIso8601String(),
+          if (exitedAt != null) 'exitedAt': exitedAt.toIso8601String(),
+        }),
+      );
+      return response.statusCode == HttpStatus.ok;
+    } catch (e) {
+      debugPrint('❌ Error al actualizar asistencia: $e');
+      return false;
+    }
+  }
+
+
 }
