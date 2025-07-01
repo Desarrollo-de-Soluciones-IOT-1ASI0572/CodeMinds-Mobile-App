@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/past_trips_screen.dart';
 import 'package:codeminds_mobile_application/screens/attendance_screen.dart';
 import 'package:codeminds_mobile_application/screens/map_screen.dart';
-
-import '../widgets/custom_bottom_navigation_bar_Driver.dart'; // si hay
+import 'package:shared_preferences/shared_preferences.dart';
+import '../features/tracking/data/remote/trip_service.dart';
+import '../widgets/custom_bottom_navigation_bar_Driver.dart';
 
 class HomeDriverScreen extends StatefulWidget {
   final String name;
@@ -23,6 +23,8 @@ class HomeDriverScreen extends StatefulWidget {
 
 class _HomeDriverScreenState extends State<HomeDriverScreen> {
   int _selectedIndex = 0;
+  int? _currentTripId;
+  bool _tripStarted = false;
 
   void _onNavTap(int index) {
     if (_selectedIndex == index) return;
@@ -32,17 +34,11 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
 
     switch (index) {
       case 0:
-        /*Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeDriverScreen()),
-        );*/
         break;
       case 1:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const MapScreen()), // si tienes pantalla de mapa
+          MaterialPageRoute(builder: (context) => const MapScreen()),
         );
         break;
       case 2:
@@ -62,10 +58,121 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
     }
   }
 
+  void _showCreateTripDialog(BuildContext context) {
+    final TextEditingController originController = TextEditingController();
+    final TextEditingController destinationController = TextEditingController();
+    final tripService = TripService();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Nuevo Viaje"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: originController,
+              decoration: const InputDecoration(labelText: "Origen (ej: Colegio)"),
+            ),
+            TextField(
+              controller: destinationController,
+              decoration: const InputDecoration(labelText: "Destino (ej: Urbanización)"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (originController.text.isEmpty || destinationController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("¡Ingresa origen y destino!")),
+                );
+                return;
+              }
+              Navigator.pop(context);
+
+              final prefs = await SharedPreferences.getInstance();
+              final driverId = prefs.getInt('user_id');
+              if (driverId == null) return;
+
+              final tripId = await tripService.createTrip(
+                vehicleId: driverId,
+                driverId: driverId,
+                origin: originController.text,
+                destination: destinationController.text,
+              );
+
+              if (tripId != null) {
+                setState(() {
+                  _currentTripId = tripId;
+                  _tripStarted = false;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("¡Viaje creado (ID: $tripId)!")),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Error al crear el viaje")),
+                );
+              }
+            },
+            child: const Text("Crear Viaje"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _startTrip() async {
+    if (_currentTripId == null) return;
+
+    final success = await TripService().startTrip(_currentTripId!);
+    if (success) {
+      setState(() {
+        _tripStarted = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("¡Viaje iniciado!")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error al iniciar viaje")),
+      );
+    }
+  }
+
+  Future<void> _endTrip() async {
+    if (_currentTripId == null) return;
+
+    final success = await TripService().endTrip(_currentTripId!);
+    if (success) {
+      setState(() {
+        _tripStarted = false;
+        _currentTripId = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("¡Viaje finalizado!")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error al finalizar viaje")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE3F2FD),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showCreateTripDialog(context),
+        child: const Icon(Icons.add),
+        tooltip: 'Crear Viaje',
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -73,7 +180,6 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo y bienvenida
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -93,15 +199,11 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                // Botón de emergencia
                 Center(
                   child: Column(
                     children: [
                       GestureDetector(
-                        onTap: () {
-                          // Acción de emergencia
-                        },
+                        onTap: () {},
                         child: Image.asset(
                           'assets/images/EmergencyButton.png',
                           height: 100,
@@ -118,8 +220,6 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Past Trips & Attendance
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -177,8 +277,6 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                // Mapa
                 SizedBox(
                   height: 250,
                   child: FlutterMap(
@@ -189,7 +287,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                     children: [
                       TileLayer(
                         urlTemplate:
-                            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                         subdomains: ['a', 'b', 'c'],
                       ),
                       MarkerLayer(
@@ -209,6 +307,19 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                     ],
                   ),
                 ),
+                if (_currentTripId != null && !_tripStarted)
+                  ElevatedButton(
+                    onPressed: _startTrip,
+                    child: const Text("Iniciar Viaje"),
+                  ),
+                if (_currentTripId != null && _tripStarted)
+                  ElevatedButton(
+                    onPressed: _endTrip,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text("Terminar Viaje"),
+                  ),
               ],
             ),
           ),
