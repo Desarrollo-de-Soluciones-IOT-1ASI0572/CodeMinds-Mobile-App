@@ -27,4 +27,7 @@ class AppConstants {
   static const String singInEndpoint = '/authentication/sign-in';
   static const String singUpEndpoint = '/authentication/sign-up';
 
+  static const String startTripEndpoint = '/vehicle-tracking/routes/start';
+  static const String endTripEndpoint = '/vehicle-tracking/routes/end';
+  static const String tripStudentsEndpoint = '/vehicle-tracking/trips';
 }
