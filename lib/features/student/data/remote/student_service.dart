@@ -3,11 +3,9 @@ import 'dart:io';
 import 'package:codeminds_mobile_application/features/student/data/remote/student.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/app_constants.dart';
 
 class StudentService {
-  final String baseUrl =
-      'https://edugo-service-de983aa97099.herokuapp.com/api/v1';
-
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('jwt_token');
@@ -17,7 +15,7 @@ class StudentService {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
-    final url = Uri.parse('$baseUrl/students/all');
+    final url = Uri.parse('${AppConstants.baseUrl}/students/all');
     final response = await http.get(
       url,
       headers: {
@@ -38,7 +36,7 @@ class StudentService {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
-    final url = Uri.parse('$baseUrl/students/$id');
+    final url = Uri.parse('${AppConstants.baseUrl}/students/$id');
     final response = await http.get(
       url,
       headers: {
@@ -58,7 +56,7 @@ class StudentService {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
-    final url = Uri.parse('$baseUrl/students/create');
+    final url = Uri.parse('${AppConstants.baseUrl}/students/create');
     final response = await http.post(
       url,
       headers: {
@@ -87,7 +85,7 @@ class StudentService {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
-    final url = Uri.parse('$baseUrl/students/all');
+    final url = Uri.parse('${AppConstants.baseUrl}/students/all');
     final response = await http.get(
       url,
       headers: {
@@ -102,8 +100,8 @@ class StudentService {
       return jsonList
           .map((e) => StudentModel.fromJson(e))
           .where((student) =>
-              student.parentProfile != null &&
-              student.parentProfile!.userId == parentUserId)
+      student.parentProfile != null &&
+          student.parentProfile!.userId == parentUserId)
           .toList();
     } else {
       throw Exception('Error al obtener los estudiantes');
