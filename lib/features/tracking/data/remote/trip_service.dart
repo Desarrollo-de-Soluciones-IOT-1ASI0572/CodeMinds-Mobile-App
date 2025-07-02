@@ -109,7 +109,36 @@ class TripService {
     }
   }
 
-  Future<Map<String, dynamic>?> getCurrentVehicleLocation(int studentId) async {
+  Future<Map<String, dynamic>> getCurrentVehicleLocation(int studentId) async {
+    final url = '${AppConstants.baseUrl}/vehicle-tracking/students/$studentId/current-vehicle-location';
+    debugPrint('🚗 Obteniendo ubicación del vehículo para estudiante $studentId');
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+      );
+
+      debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == HttpStatus.ok) {
+        final data = jsonDecode(response.body);
+        debugPrint('📍 Ubicación obtenida: ${data['location']}');
+        return data;
+      } else if (response.statusCode == HttpStatus.notFound) {
+        debugPrint('⚠️ No se encontró viaje activo para el estudiante');
+        throw Exception('No active trip found for student');
+      } else {
+        debugPrint('❌ Error del servidor: ${response.statusCode}');
+        throw Exception('Failed to fetch vehicle location');
+      }
+    } catch (e) {
+      debugPrint('❌ Excepción al obtener ubicación: $e');
+      throw Exception('Error fetching vehicle location: $e');
+    }
+  }
+
+  /*Future<Map<String, dynamic>?> getCurrentVehicleLocation(int studentId) async {
     try {
       final response = await http.get(
         Uri.parse(
@@ -124,7 +153,9 @@ class TripService {
       print('Error fetching vehicle location: $e');
       return null;
     }
-  }
+  }*/
+
+
 
   Future<List<TripDTO>> getCompletedTripsByDriver(int driverId) async {
     final url =
@@ -309,6 +340,8 @@ class TripService {
       return false;
     }
   }
+
+
 
 
 }
