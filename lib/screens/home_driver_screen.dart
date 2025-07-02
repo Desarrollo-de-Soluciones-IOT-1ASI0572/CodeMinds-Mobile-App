@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/past_trips_screen.dart';
@@ -8,6 +9,7 @@ import 'package:codeminds_mobile_application/screens/attendance_screen.dart';
 import 'package:codeminds_mobile_application/screens/map_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/tracking/data/remote/trip_service.dart';
+import '../providers/TripProvider.dart';
 import '../widgets/custom_bottom_navigation_bar_Driver.dart';
 
 class HomeDriverScreen extends StatefulWidget {
@@ -23,8 +25,28 @@ class HomeDriverScreen extends StatefulWidget {
 
 class _HomeDriverScreenState extends State<HomeDriverScreen> {
   int _selectedIndex = 0;
-  int? _currentTripId;
-  bool _tripStarted = false;
+  late TripProvider _tripProvider;
+  int? _currentDriverId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedIndex;
+    _loadDriverId();
+  }
+
+  Future<void> _loadDriverId() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _currentDriverId = prefs.getInt('user_id');
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tripProvider = Provider.of<TripProvider>(context);
+  }
 
   void _onNavTap(int index) {
     if (_selectedIndex == index) return;
@@ -36,20 +58,20 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
       case 0:
         break;
       case 1:
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const MapScreen()),
         );
         break;
       case 2:
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => const NotificationScreen(selectedIndex: 2)),
         );
         break;
       case 3:
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => const AccountScreen(selectedIndex: 3)),
@@ -95,22 +117,17 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
               }
               Navigator.pop(context);
 
-              final prefs = await SharedPreferences.getInstance();
-              final driverId = prefs.getInt('user_id');
-              if (driverId == null) return;
+              if (_currentDriverId == null) return;
 
               final tripId = await tripService.createTrip(
-                vehicleId: driverId,
-                driverId: driverId,
+                vehicleId: _currentDriverId!,
+                driverId: _currentDriverId!,
                 origin: originController.text,
                 destination: destinationController.text,
               );
 
               if (tripId != null) {
-                setState(() {
-                  _currentTripId = tripId;
-                  _tripStarted = false;
-                });
+                _tripProvider.createNewTrip(tripId, _currentDriverId!);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("¡Viaje creado (ID: $tripId)!")),
                 );
@@ -128,13 +145,11 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
   }
 
   Future<void> _startTrip() async {
-    if (_currentTripId == null) return;
+    if (_tripProvider.currentTripId == null || !_tripProvider.isTripForDriver(_currentDriverId!)) return;
 
-    final success = await TripService().startTrip(_currentTripId!);
+    final success = await TripService().startTrip(_tripProvider.currentTripId!);
     if (success) {
-      setState(() {
-        _tripStarted = true;
-      });
+      _tripProvider.startCurrentTrip();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("¡Viaje iniciado!")),
       );
@@ -146,14 +161,11 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
   }
 
   Future<void> _endTrip() async {
-    if (_currentTripId == null) return;
+    if (_tripProvider.currentTripId == null || !_tripProvider.isTripForDriver(_currentDriverId!)) return;
 
-    final success = await TripService().endTrip(_currentTripId!);
+    final success = await TripService().endTrip(_tripProvider.currentTripId!);
     if (success) {
-      setState(() {
-        _tripStarted = false;
-        _currentTripId = null;
-      });
+      _tripProvider.endCurrentTrip();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("¡Viaje finalizado!")),
       );
@@ -164,15 +176,23 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
     }
   }
 
+  bool _shouldShowTripControls() {
+    return _currentDriverId != null &&
+        _tripProvider.isTripForDriver(_currentDriverId!) &&
+        _tripProvider.hasActiveTrip;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE3F2FD),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: _currentDriverId != null
+          ? FloatingActionButton(
         onPressed: () => _showCreateTripDialog(context),
         child: const Icon(Icons.add),
         tooltip: 'Crear Viaje',
-      ),
+      )
+          : null,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -307,12 +327,12 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                     ],
                   ),
                 ),
-                if (_currentTripId != null && !_tripStarted)
+                if (_shouldShowTripControls() && !_tripProvider.tripStarted)
                   ElevatedButton(
                     onPressed: _startTrip,
                     child: const Text("Iniciar Viaje"),
                   ),
-                if (_currentTripId != null && _tripStarted)
+                if (_shouldShowTripControls() && _tripProvider.tripStarted)
                   ElevatedButton(
                     onPressed: _endTrip,
                     style: ElevatedButton.styleFrom(
