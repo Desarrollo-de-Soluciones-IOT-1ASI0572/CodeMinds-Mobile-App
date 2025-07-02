@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:codeminds_mobile_application/screens/login_screen.dart';
+
+import 'providers/TripProvider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => TripProvider()),
+        // Puedes añadir más providers aquí si los necesitas
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -10,9 +21,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      home: const LoginScreen(),
+      // Opcional: configura rutas con nombre si las usas
+      routes: {
+        // '/login': (context) => const LoginScreen(),
+        // '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }
