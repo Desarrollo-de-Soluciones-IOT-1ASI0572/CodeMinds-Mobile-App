@@ -2,10 +2,13 @@
 
 class TripState {
   final int tripId;
-  bool isStarted;
   final int driverId;
+  bool isStarted;
   DateTime? startTime;
   DateTime? endTime;
+
+  final String originAddress;     // 👈 NUEVO
+  final String destinationAddress; // 👈 NUEVO
 
   TripState({
     required this.tripId,
@@ -13,8 +16,11 @@ class TripState {
     this.isStarted = false,
     this.startTime,
     this.endTime,
+    required this.originAddress,      // 👈 NUEVO
+    required this.destinationAddress, // 👈 NUEVO
   });
 }
+
 
 class TripProvider with ChangeNotifier {
   final Map<int, TripState> _trips = {}; // Key: driverId
@@ -27,16 +33,19 @@ class TripProvider with ChangeNotifier {
   int? getCurrentTripId(int driverId) => _trips[driverId]?.tripId;
 
   // Métodos para modificar el estado
-  void createNewTrip(int tripId, int driverId) {
+  void createNewTrip(int tripId, int driverId, String originAddress, String destinationAddress) {
     _trips[driverId] = TripState(
       tripId: tripId,
       driverId: driverId,
       isStarted: false,
       startTime: null,
       endTime: null,
+      originAddress: originAddress,
+      destinationAddress: destinationAddress,
     );
     notifyListeners();
   }
+
 
   void startTrip(int driverId) {
     final trip = _trips[driverId];
