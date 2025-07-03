@@ -145,11 +145,14 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
   }
 
   Future<void> _startTrip() async {
-    if (_tripProvider.currentTripId == null || !_tripProvider.isTripForDriver(_currentDriverId!)) return;
+    if (_currentDriverId == null) return;
 
-    final success = await TripService().startTrip(_tripProvider.currentTripId!);
+    final tripId = _tripProvider.getCurrentTripId(_currentDriverId!);
+    if (tripId == null) return;
+
+    final success = await TripService().startTrip(tripId);
     if (success) {
-      _tripProvider.startCurrentTrip();
+      _tripProvider.startTrip(_currentDriverId!);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("¡Viaje iniciado!")),
       );
@@ -161,11 +164,14 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
   }
 
   Future<void> _endTrip() async {
-    if (_tripProvider.currentTripId == null || !_tripProvider.isTripForDriver(_currentDriverId!)) return;
+    if (_currentDriverId == null) return;
 
-    final success = await TripService().endTrip(_tripProvider.currentTripId!);
+    final tripId = _tripProvider.getCurrentTripId(_currentDriverId!);
+    if (tripId == null) return;
+
+    final success = await TripService().endTrip(tripId);
     if (success) {
-      _tripProvider.endCurrentTrip();
+      _tripProvider.endTrip(_currentDriverId!);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("¡Viaje finalizado!")),
       );
@@ -178,12 +184,15 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
 
   bool _shouldShowTripControls() {
     return _currentDriverId != null &&
-        _tripProvider.isTripForDriver(_currentDriverId!) &&
-        _tripProvider.hasActiveTrip;
+        _tripProvider.hasActiveTrip(_currentDriverId!);
   }
 
   @override
   Widget build(BuildContext context) {
+    final isTripStarted = _currentDriverId != null
+        ? _tripProvider.isTripStarted(_currentDriverId!)
+        : false;
+
     return Scaffold(
       backgroundColor: const Color(0xFFE3F2FD),
       floatingActionButton: _currentDriverId != null
@@ -327,12 +336,12 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                     ],
                   ),
                 ),
-                if (_shouldShowTripControls() && !_tripProvider.tripStarted)
+                if (_shouldShowTripControls() && !isTripStarted)
                   ElevatedButton(
                     onPressed: _startTrip,
                     child: const Text("Iniciar Viaje"),
                   ),
-                if (_shouldShowTripControls() && _tripProvider.tripStarted)
+                if (_shouldShowTripControls() && isTripStarted)
                   ElevatedButton(
                     onPressed: _endTrip,
                     style: ElevatedButton.styleFrom(

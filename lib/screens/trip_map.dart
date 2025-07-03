@@ -8,7 +8,7 @@ class TripMap extends StatefulWidget {
   const TripMap({
     Key? key,
     this.routeCoordinates,
-    this.showInitialPlaceholder = false,
+    this.showInitialPlaceholder = false, required bool showFullMap,
   }) : super(key: key);
 
   @override

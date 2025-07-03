@@ -1,45 +1,67 @@
 ﻿import 'package:flutter/material.dart';
 
+class TripState {
+  final int tripId;
+  bool isStarted;
+  final int driverId;
+  DateTime? startTime;
+  DateTime? endTime;
+
+  TripState({
+    required this.tripId,
+    required this.driverId,
+    this.isStarted = false,
+    this.startTime,
+    this.endTime,
+  });
+}
+
 class TripProvider with ChangeNotifier {
-  int? _currentTripId;
-  bool _tripStarted = false;
-  int? _currentDriverId;
+  final Map<int, TripState> _trips = {}; // Key: driverId
 
   // Getters
-  int? get currentTripId => _currentTripId;
-  bool get tripStarted => _tripStarted;
-  bool get hasActiveTrip => _currentTripId != null;
-  int? get currentDriverId => _currentDriverId;
+  TripState? getCurrentTrip(int driverId) => _trips[driverId];
+
+  bool isTripStarted(int driverId) => _trips[driverId]?.isStarted ?? false;
+  bool hasActiveTrip(int driverId) => _trips.containsKey(driverId);
+  int? getCurrentTripId(int driverId) => _trips[driverId]?.tripId;
 
   // Métodos para modificar el estado
   void createNewTrip(int tripId, int driverId) {
-    _currentTripId = tripId;
-    _currentDriverId = driverId;
-    _tripStarted = false;
+    _trips[driverId] = TripState(
+      tripId: tripId,
+      driverId: driverId,
+      isStarted: false,
+      startTime: null,
+      endTime: null,
+    );
     notifyListeners();
   }
 
-  void startCurrentTrip() {
-    if (_currentTripId == null) return;
-    _tripStarted = true;
+  void startTrip(int driverId) {
+    final trip = _trips[driverId];
+    if (trip == null) return;
+
+    trip.isStarted = true;
+    trip.startTime = DateTime.now();
     notifyListeners();
   }
 
-  void endCurrentTrip() {
-    _currentTripId = null;
-    _currentDriverId = null;
-    _tripStarted = false;
+  void endTrip(int driverId) {
+    final trip = _trips[driverId];
+    if (trip == null) return;
+
+    trip.isStarted = false;
+    trip.endTime = DateTime.now();
     notifyListeners();
   }
 
-  void resetTrip() {
-    _currentTripId = null;
-    _currentDriverId = null;
-    _tripStarted = false;
+  void resetTrip(int driverId) {
+    _trips.remove(driverId);
     notifyListeners();
   }
 
-  bool isTripForDriver(int driverId) {
-    return _currentDriverId == driverId;
+  bool isTripForDriver(int driverId, int targetDriverId) {
+    return _trips[driverId]?.driverId == targetDriverId;
   }
 }

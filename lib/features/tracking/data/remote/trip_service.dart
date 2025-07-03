@@ -75,7 +75,7 @@ class TripService {
 
   Future<List<Location>> getTripLocations(int tripId) async {
     final url =
-        '${AppConstants.baseUrl}/vehicle-tracking/locations/trip/$tripId';
+        '${AppConstants.baseUrl}/locations/trip/$tripId';
     debugPrint('🔍 Llamando a: $url');
 
     try {
@@ -110,7 +110,7 @@ class TripService {
   }
 
   Future<Map<String, dynamic>> getCurrentVehicleLocation(int studentId) async {
-    final url = '${AppConstants.baseUrl}/vehicle-tracking/students/$studentId/current-vehicle-location';
+    final url = '${AppConstants.baseUrl}/vehicles/students/$studentId/current-vehicle-location';
     debugPrint('🚗 Obteniendo ubicación del vehículo para estudiante $studentId');
 
     try {
@@ -138,25 +138,6 @@ class TripService {
     }
   }
 
-  /*Future<Map<String, dynamic>?> getCurrentVehicleLocation(int studentId) async {
-    try {
-      final response = await http.get(
-        Uri.parse(
-            '${AppConstants.baseUrl}/vehicle-tracking/students/$studentId/current-vehicle-location'),
-      );
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      }
-      return null;
-    } catch (e) {
-      print('Error fetching vehicle location: $e');
-      return null;
-    }
-  }*/
-
-
-
   Future<List<TripDTO>> getCompletedTripsByDriver(int driverId) async {
     final url =
         '${AppConstants.baseUrl}${AppConstants.completedTripsByDriverEndpoint}/$driverId';
@@ -180,33 +161,6 @@ class TripService {
       throw Exception('Failed to load trips: $e');
     }
   }
-
-  /*Future<List<Map<String, dynamic>>> getTripStudents(int tripId) async {
-    final url =
-        '${AppConstants.baseUrl}/vehicle-tracking/trips/$tripId/students';
-    debugPrint('📘 Llamando a: $url');
-
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == HttpStatus.ok) {
-        final List<dynamic> data = jsonDecode(response.body);
-        debugPrint(
-            '✅ ${data.length} estudiantes recibidos para tripId=$tripId');
-        return data.cast<Map<String, dynamic>>();
-      } else {
-        debugPrint(
-            '⚠️ Respuesta no OK (${response.statusCode}) al obtener estudiantes');
-        return [];
-      }
-    } catch (e) {
-      debugPrint('❌ Error al obtener estudiantes del viaje $tripId: $e');
-      return [];
-    }
-  }*/
 
   Future<List<Map<String, dynamic>>> getTripStudents(int tripId) async {
     final url = '${AppConstants.baseUrl}${AppConstants.tripStudentsEndpoint}/$tripId/students';
@@ -234,7 +188,7 @@ class TripService {
 
   Future<List<ActiveTripDTO>> getActiveTripByDriver(int driverId) async {
     final url =
-        '${AppConstants.baseUrl}/vehicle-tracking/trips/active/driver/$driverId';
+        '${AppConstants.baseUrl}/trips/active/driver/$driverId';
     debugPrint('🌐 Calling active trip endpoint: $url');
 
     try {
@@ -265,7 +219,7 @@ class TripService {
   }
 
   Future<bool> startTrip(int tripId) async {
-    final url = '${AppConstants.baseUrl}/vehicle-tracking/routes/start';
+    final url = '${AppConstants.baseUrl}/routes/start';
     debugPrint('🚦 Intentando iniciar viaje ID: $tripId en $url');
 
     try {
