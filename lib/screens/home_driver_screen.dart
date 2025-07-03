@@ -127,13 +127,14 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
               );
 
               if (tripId != null) {
-                _tripProvider.createNewTrip(tripId, _currentDriverId!);
+                _tripProvider.createNewTrip(
+                  tripId,
+                  _currentDriverId!,
+                  originController.text,    // 👈 Pasas origen
+                  destinationController.text, // 👈 Pasas destino
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("¡Viaje creado (ID: $tripId)!")),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Error al crear el viaje")),
                 );
               }
             },
