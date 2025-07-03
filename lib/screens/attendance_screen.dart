@@ -5,7 +5,6 @@ import 'package:codeminds_mobile_application/screens/notification_screen.dart';
 import 'package:codeminds_mobile_application/screens/account_screen.dart';
 import 'package:codeminds_mobile_application/widgets/custom_bottom_navigation_bar_driver.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:codeminds_mobile_application/core/app_constants.dart';
 import 'package:codeminds_mobile_application/features/tracking/data/remote/trip_service.dart';
 
 class AttendanceScreen extends StatefulWidget {
@@ -29,6 +28,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     _fetchActiveTrip();
   }
 
+  /// 🚦 Combina: obtiene viaje y luego consulta estudiantes del backend.
   Future<void> _fetchActiveTrip() async {
     setState(() => _isLoading = true);
     final prefs = await SharedPreferences.getInstance();
@@ -37,11 +37,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     try {
       final activeTrips = await _tripService.getActiveTripByDriver(userId!);
       if (activeTrips.isNotEmpty) {
+        final trip = activeTrips.first;
+
         setState(() {
           _hasActiveTrip = true;
-          _activeTripId = activeTrips.first.id;
+          _activeTripId = trip.id;
         });
-        _loadStudents();
+
+        // 🔥 Siempre usa getTripStudents para estado real.
+        await _loadStudents();
       } else {
         setState(() => _hasActiveTrip = false);
       }
@@ -52,6 +56,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
+  /// ✅ Siempre obtiene boardedAt y exitedAt actualizados.
   Future<void> _loadStudents() async {
     if (_activeTripId == null) return;
     setState(() => _isLoading = true);
@@ -66,13 +71,30 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget _buildContent() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (!_hasActiveTrip) return const Center(child: Text('No tienes viajes activos', style: TextStyle(fontSize: 18)));
-    if (students.isEmpty) return const Center(child: Text('No hay estudiantes en este viaje', style: TextStyle(fontSize: 18)));
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (!_hasActiveTrip) {
+      return const Center(
+        child: Text(
+          'No tienes viajes activos',
+          style: TextStyle(fontSize: 18),
+        ),
+      );
+    }
+    if (students.isEmpty) {
+      return const Center(
+        child: Text(
+          'No hay estudiantes en este viaje',
+          style: TextStyle(fontSize: 18),
+        ),
+      );
+    }
 
     return ListView.builder(
       itemCount: students.length,
-      itemBuilder: (context, index) => _buildStudentTile(students[index]),
+      itemBuilder: (context, index) =>
+          _buildStudentTile(students[index]),
     );
   }
 
@@ -84,14 +106,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundImage: _getStudentImage(student['studentPhotoUrl']),
+          backgroundImage:
+          _getStudentImage(student['studentPhotoUrl']),
         ),
         title: Text('${student['name']} ${student['lastName']}'),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('📍 ${student['homeAddress']}'),
-            Text('Estado: ${status['text']}', style: TextStyle(color: status['color'])),
+            Text('Estado: ${status['text']}',
+                style: TextStyle(color: status['color'])),
             if (status['time'] != null) Text('🕒 ${status['time']}'),
           ],
         ),
@@ -157,10 +181,33 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (_selectedIndex == index) return;
     setState(() => _selectedIndex = index);
     switch (index) {
-      case 0: _navigateToHomeDriver(); break;
-      case 1: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const TrackingScreen(selectedIndex: 1))); break;
-      case 2: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NotificationScreen(selectedIndex: 2))); break;
-      case 3: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AccountScreen(selectedIndex: 3))); break;
+      case 0:
+        _navigateToHomeDriver();
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+              const TrackingScreen(selectedIndex: 1)),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+              const NotificationScreen(selectedIndex: 2)),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+              const AccountScreen(selectedIndex: 3)),
+        );
+        break;
     }
   }
 

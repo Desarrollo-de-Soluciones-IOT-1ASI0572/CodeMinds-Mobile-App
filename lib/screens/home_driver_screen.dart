@@ -171,7 +171,11 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
 
     final success = await TripService().endTrip(tripId);
     if (success) {
-      _tripProvider.endTrip(_currentDriverId!);
+      _tripProvider.endTrip(_currentDriverId!); // Marca como terminado
+      _tripProvider.resetTrip(_currentDriverId!); // 👈 Limpia la clave, ya no hay trip activo
+
+      setState(() {}); // Forzar reconstrucción para ocultar botones
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("¡Viaje finalizado!")),
       );
@@ -181,6 +185,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
       );
     }
   }
+
 
   bool _shouldShowTripControls() {
     return _currentDriverId != null &&
