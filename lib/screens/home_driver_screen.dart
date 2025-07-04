@@ -130,8 +130,8 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                 _tripProvider.createNewTrip(
                   tripId,
                   _currentDriverId!,
-                  originController.text,    // 👈 Pasas origen
-                  destinationController.text, // 👈 Pasas destino
+                  originController.text,
+                  destinationController.text,
                 );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("¡Viaje creado (ID: $tripId)!")),
@@ -172,10 +172,10 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
 
     final success = await TripService().endTrip(tripId);
     if (success) {
-      _tripProvider.endTrip(_currentDriverId!); // Marca como terminado
-      _tripProvider.resetTrip(_currentDriverId!); // 👈 Limpia la clave, ya no hay trip activo
+      _tripProvider.endTrip(_currentDriverId!);
+      _tripProvider.resetTrip(_currentDriverId!);
 
-      setState(() {}); // Forzar reconstrucción para ocultar botones
+      setState(() {});
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("¡Viaje finalizado!")),
@@ -186,7 +186,6 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
       );
     }
   }
-
 
   bool _shouldShowTripControls() {
     return _currentDriverId != null &&
