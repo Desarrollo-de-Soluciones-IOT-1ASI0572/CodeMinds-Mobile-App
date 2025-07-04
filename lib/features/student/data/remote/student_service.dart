@@ -15,7 +15,7 @@ class StudentService {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
-    final url = Uri.parse('${AppConstants.baseUrl}/students/all');
+    final url = Uri.parse('${AppConstants.baseUrl}/students');
     final response = await http.get(
       url,
       headers: {
@@ -56,7 +56,7 @@ class StudentService {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
-    final url = Uri.parse('${AppConstants.baseUrl}/students/create');
+    final url = Uri.parse('${AppConstants.baseUrl}/students');
     final response = await http.post(
       url,
       headers: {
@@ -85,7 +85,7 @@ class StudentService {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
-    final url = Uri.parse('${AppConstants.baseUrl}/students/all');
+    final url = Uri.parse('${AppConstants.baseUrl}/students');
     final response = await http.get(
       url,
       headers: {
@@ -96,7 +96,6 @@ class StudentService {
 
     if (response.statusCode == HttpStatus.ok) {
       List<dynamic> jsonList = jsonDecode(response.body);
-      // Filtrar los estudiantes cuyo parentProfile.userId coincide con parentUserId
       return jsonList
           .map((e) => StudentModel.fromJson(e))
           .where((student) =>
