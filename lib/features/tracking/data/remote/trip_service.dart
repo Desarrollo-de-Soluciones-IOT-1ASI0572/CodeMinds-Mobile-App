@@ -201,7 +201,7 @@ class TripService {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((json) => ActiveTripDTO.fromJson(json)).toList();
       } else if (response.statusCode == HttpStatus.notFound) {
-        return []; // Retorna lista vacía si no hay viaje activo
+        return [];
       } else {
         debugPrint('⚠️ Error ${response.statusCode}: ${response.body}');
         throw Exception(
@@ -219,11 +219,11 @@ class TripService {
   }
 
   Future<bool> startTrip(int tripId) async {
-    final url = '${AppConstants.baseUrl}/routes/start';
+    final url = '${AppConstants.baseUrl}${AppConstants.startTripEndpoint}';
     debugPrint('🚦 Intentando iniciar viaje ID: $tripId en $url');
 
     try {
-      final response = await http.post(
+      final response = await http.put(
         Uri.parse(url),
         headers: await _getHeaders(),
         body: jsonEncode({'tripId': tripId}),
@@ -249,7 +249,7 @@ class TripService {
     debugPrint('🛑 Intentando finalizar viaje ID: $tripId en $url');
 
     try {
-      final response = await http.post(
+      final response = await http.put(
         Uri.parse(url),
         headers: await _getHeaders(),
         body: jsonEncode({'tripId': tripId}),
