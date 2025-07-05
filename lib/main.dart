@@ -1,8 +1,7 @@
+import 'package:codeminds_mobile_application/tracking/infrastructure/data_sources/trip_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:codeminds_mobile_application/screens/login_screen.dart';
-
-import 'providers/TripProvider.dart';
+import 'package:codeminds_mobile_application/profiles/presentation/login_screen.dart';
 
 void main() {
   runApp(
