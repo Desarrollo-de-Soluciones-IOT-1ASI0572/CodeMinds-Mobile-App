@@ -1,4 +1,4 @@
-import 'package:codeminds_mobile_application/student/presentation/children_screen.dart';
+import 'package:codeminds_mobile_application/assignments/presentation/children_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_parent_screen.dart';
 import '../tracking/presentation/tracking_screen.dart';
