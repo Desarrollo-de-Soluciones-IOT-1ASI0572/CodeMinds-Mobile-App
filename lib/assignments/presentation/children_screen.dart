@@ -6,8 +6,8 @@ import 'package:codeminds_mobile_application/profiles/presentation/add_student_s
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/remote/student.dart';
-import '../data/remote/student_service.dart';
+import '../domain/entities/student.dart';
+import '../api/student_service.dart';
 
 class ChildrenScreen extends StatefulWidget {
   const ChildrenScreen({super.key});
