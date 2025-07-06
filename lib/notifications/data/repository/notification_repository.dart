@@ -1,4 +1,4 @@
-import '../../domain/notification.dart';
+import '../../domain/entities/notification.dart';
 import '../remote/notification_dto.dart';
 import '../remote/notification_service.dart';
 

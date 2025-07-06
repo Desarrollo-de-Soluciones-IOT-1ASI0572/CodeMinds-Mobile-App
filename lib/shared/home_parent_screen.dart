@@ -1,13 +1,13 @@
 import 'package:codeminds_mobile_application/assignments/domain/entities/student.dart';
 import 'package:codeminds_mobile_application/assignments/api/student_service.dart';
-import 'package:codeminds_mobile_application/shared/notification_screen.dart';
+import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/tracking_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:codeminds_mobile_application/notifications/data/remote/notification_service.dart';
 import 'package:codeminds_mobile_application/notifications/data/repository/notification_repository.dart';
-import 'package:codeminds_mobile_application/notifications/domain/notification.dart';
+import 'package:codeminds_mobile_application/notifications/domain/entities/notification.dart';
 import 'package:codeminds_mobile_application/assignments/presentation/children_screen.dart';
 import '../tracking/data/remote/trip_service.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
@@ -31,7 +31,7 @@ class HomeParentScreen extends StatefulWidget {
 }
 
 class _HomeParentScreenState extends State<HomeParentScreen> {
-  List<StudentModel> _children = [];
+  List<Student> _children = [];
   List<Notification> _notifications = [];
   final int _studentId = 16;
 
@@ -152,7 +152,7 @@ class _HomeParentScreenState extends State<HomeParentScreen> {
       notificationService: NotificationService(),
     ).getNotificationsByUserId(userId!);
 
-    List<StudentModel> children =
+    List<Student> children =
         await StudentService().getStudentsByParentUserId(userId);
 
     setState(() {

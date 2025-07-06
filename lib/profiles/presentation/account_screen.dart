@@ -1,7 +1,7 @@
 import 'package:codeminds_mobile_application/shared/home_driver_screen.dart';
 import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/map_screen.dart';
-import 'package:codeminds_mobile_application/shared/notification_screen.dart';
+import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/tracking_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar_Driver.dart';

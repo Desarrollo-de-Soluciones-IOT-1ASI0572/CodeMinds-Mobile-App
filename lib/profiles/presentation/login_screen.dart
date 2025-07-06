@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:codeminds_mobile_application/shared/home_driver_screen.dart';
 import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
-import 'package:codeminds_mobile_application/shared/notification_screen.dart';
+import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/role_selection_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

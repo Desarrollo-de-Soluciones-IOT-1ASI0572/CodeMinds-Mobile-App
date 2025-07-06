@@ -1,4 +1,4 @@
-class StudentModel {
+class Student {
   final int id;
   final String name;
   final String lastName;
@@ -6,11 +6,10 @@ class StudentModel {
   final String schoolAddress;
   final String studentPhotoUrl;
   final Wristband? wristband;
-  //final ParentProfile? parentProfile;
   final int parentProfileId;
   final int? driverId;
 
-  StudentModel({
+  Student({
     required this.id,
     required this.name,
     required this.lastName,
@@ -22,8 +21,8 @@ class StudentModel {
     this.driverId,
   });
 
-  factory StudentModel.fromJson(Map<String, dynamic> json) {
-    return StudentModel(
+  factory Student.fromJson(Map<String, dynamic> json) {
+    return Student(
       id: json['id'],
       name: json['name'],
       lastName: json['lastName'],
@@ -45,7 +44,7 @@ class Wristband {
   final int id;
   final String rfidCode;
   final String wristbandStatus;
-  final StudentModel? student;
+  final Student? student;
   final List<dynamic> sensorScans;
 
   Wristband({
@@ -62,7 +61,7 @@ class Wristband {
       rfidCode: json['rfidCode'],
       wristbandStatus: json['wristbandStatus'],
       student: json['student'] != null
-          ? StudentModel.fromJson(json['student'])
+          ? Student.fromJson(json['student'])
           : null,
       sensorScans: json['sensorScans'] ?? [],
     );

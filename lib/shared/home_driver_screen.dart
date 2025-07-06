@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
-import 'package:codeminds_mobile_application/shared/notification_screen.dart';
+import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/past_trips_screen.dart';
 import 'package:codeminds_mobile_application/assignments/presentation/attendance_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/map_screen.dart';

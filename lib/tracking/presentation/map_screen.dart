@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/home_driver_screen.dart';
-import '../../shared/notification_screen.dart';
+import '../../notifications/presentation/notification_screen.dart';
 import '../../profiles/presentation/account_screen.dart';
 import '../infrastructure/data_sources/trip_provider.dart';
 

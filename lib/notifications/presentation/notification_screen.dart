@@ -5,7 +5,7 @@ import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_naviga
 import 'package:flutter/material.dart' hide Notification;
 import 'package:codeminds_mobile_application/notifications/data/remote/notification_service.dart';
 import 'package:codeminds_mobile_application/notifications/data/repository/notification_repository.dart';
-import 'package:codeminds_mobile_application/notifications/domain/notification.dart';
+import 'package:codeminds_mobile_application/notifications/domain/entities/notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/tracking_screen.dart';

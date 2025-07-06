@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'notification_dto.dart';
 
+
 class NotificationService {
   Future<List<NotificationDTO>> getNotificationsByUserType(
     String userType,

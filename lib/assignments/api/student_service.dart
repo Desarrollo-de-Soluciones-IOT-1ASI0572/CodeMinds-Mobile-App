@@ -11,7 +11,7 @@ class StudentService {
     return prefs.getString('jwt_token');
   }
 
-  Future<List<StudentModel>> getAllStudents() async {
+  Future<List<Student>> getAllStudents() async {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
@@ -26,13 +26,13 @@ class StudentService {
 
     if (response.statusCode == HttpStatus.ok) {
       List<dynamic> jsonList = jsonDecode(response.body);
-      return jsonList.map((e) => StudentModel.fromJson(e)).toList();
+      return jsonList.map((e) => Student.fromJson(e)).toList();
     } else {
       throw Exception('Error al obtener los estudiantes');
     }
   }
 
-  Future<StudentModel> getStudentById(int id) async {
+  Future<Student> getStudentById(int id) async {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
@@ -46,13 +46,13 @@ class StudentService {
     );
 
     if (response.statusCode == HttpStatus.ok) {
-      return StudentModel.fromJson(jsonDecode(response.body));
+      return Student.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Error al obtener el estudiante');
     }
   }
 
-  Future<StudentModel> postStudent(StudentModel student, int parentId) async {
+  Future<Student> postStudent(Student student, int parentId) async {
     String? token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
 
@@ -75,13 +75,13 @@ class StudentService {
 
     if (response.statusCode == HttpStatus.ok ||
         response.statusCode == HttpStatus.created) {
-      return StudentModel.fromJson(jsonDecode(response.body));
+      return Student.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Error al crear el estudiante');
     }
   }
 
-  Future<List<StudentModel>> getStudentsByParentUserId(int parentUserId) async {
+  Future<List<Student>> getStudentsByParentUserId(int parentUserId) async {
     try {
       String? token = await getToken();
       if (token == null) {
@@ -107,7 +107,7 @@ class StudentService {
         print('🟢 Estudiantes recibidos: ${jsonList.length}');
 
         final students = jsonList
-            .map((e) => StudentModel.fromJson(e))
+            .map((e) => Student.fromJson(e))
             .where((student) => student.parentProfileId == parentUserId)
             .toList();
 

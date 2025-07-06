@@ -1,4 +1,5 @@
-import '../../domain/notification.dart';
+﻿
+import '../../domain/entities/notification.dart';
 
 class NotificationDTO {
   final int id;

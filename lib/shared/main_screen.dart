@@ -2,7 +2,7 @@ import 'package:codeminds_mobile_application/assignments/presentation/children_s
 import 'package:flutter/material.dart';
 import 'home_parent_screen.dart';
 import '../tracking/presentation/tracking_screen.dart';
-import 'notification_screen.dart';
+import '../notifications/presentation/notification_screen.dart';
 import '../profiles/presentation/account_screen.dart';
 import 'widgets/custom_bottom_navigation_bar.dart';
 

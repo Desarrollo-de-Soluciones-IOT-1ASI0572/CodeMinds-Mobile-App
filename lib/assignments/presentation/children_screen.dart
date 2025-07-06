@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
-import 'package:codeminds_mobile_application/shared/notification_screen.dart';
+import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/add_student_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
@@ -17,7 +17,7 @@ class ChildrenScreen extends StatefulWidget {
 }
 
 class _ChildrenScreenState extends State<ChildrenScreen> {
-  List<StudentModel> _students = [];
+  List<Student> _students = [];
   bool _isLoading = true;
   int _selectedIndex = 0;
 
@@ -161,7 +161,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     );
   }
 
-  Widget _buildChildTile(StudentModel student, int index) {
+  Widget _buildChildTile(Student student, int index) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -203,7 +203,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     );
   }
 
-  void _showStudentDetails(StudentModel student) {
+  void _showStudentDetails(Student student) {
     showDialog(
       context: context,
       builder: (context) {
@@ -237,7 +237,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     );
   }
 
-  void _confirmDelete(StudentModel student, int index) {
+  void _confirmDelete(Student student, int index) {
     showDialog(
       context: context,
       builder: (context) {

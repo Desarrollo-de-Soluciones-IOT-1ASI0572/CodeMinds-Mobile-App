@@ -6,7 +6,7 @@ import '../../shared/widgets/custom_bottom_navigation_bar_Driver.dart';
 import '../../tracking/data/remote/trip_service.dart';
 import '../../tracking/presentation/tracking_screen.dart';
 import '../../shared/home_driver_screen.dart';
-import '../../shared/notification_screen.dart';
+import '../../notifications/presentation/notification_screen.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({Key? key}) : super(key: key);

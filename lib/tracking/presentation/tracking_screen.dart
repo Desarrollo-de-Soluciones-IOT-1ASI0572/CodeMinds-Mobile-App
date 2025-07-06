@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
-import 'package:codeminds_mobile_application/shared/notification_screen.dart';
+import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
 import '../../assignments/domain/entities/student.dart';
@@ -20,8 +20,8 @@ class TrackingScreen extends StatefulWidget {
 }
 
 class _TrackingScreenState extends State<TrackingScreen> {
-  List<StudentModel> _children = [];
-  StudentModel? _selectedChild;
+  List<Student> _children = [];
+  Student? _selectedChild;
   bool _isLoading = true;
   int _selectedIndex = 0;
   LatLng? _vehiclePosition;
@@ -288,7 +288,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   // Student Selection
                   _buildInfoCard(
                     'Estudiante',
-                    DropdownButtonFormField<StudentModel>(
+                    DropdownButtonFormField<Student>(
                       value: _selectedChild,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
@@ -296,12 +296,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                       ),
-                      onChanged: (StudentModel? newValue) {
+                      onChanged: (Student? newValue) {
                         setState(() => _selectedChild = newValue);
                         _updateVehicleLocation();
                       },
-                      items: _children.map<DropdownMenuItem<StudentModel>>((child) {
-                        return DropdownMenuItem<StudentModel>(
+                      items: _children.map<DropdownMenuItem<Student>>((child) {
+                        return DropdownMenuItem<Student>(
                           value: child,
                           child: Text(
                             '${child.name} ${child.lastName}',
