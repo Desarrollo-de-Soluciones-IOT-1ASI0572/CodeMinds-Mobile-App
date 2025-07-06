@@ -1,6 +1,6 @@
-import '../../domain/trip.dart';
+import '../../domain/entities/trip.dart';
 
-class TripDTO {
+class TripModel {
   final int id;
   final int vehicleId;
   final String origin;
@@ -8,7 +8,7 @@ class TripDTO {
   final DateTime startTime;
   final DateTime endTime;
 
-  TripDTO({
+  TripModel({
     required this.id,
     required this.vehicleId,
     required this.origin,
@@ -17,8 +17,8 @@ class TripDTO {
     required this.endTime,
   });
 
-  factory TripDTO.fromJson(Map<String, dynamic> json) {
-    return TripDTO(
+  factory TripModel.fromJson(Map<String, dynamic> json) {
+    return TripModel(
       id: json['id'] ?? 0,
       vehicleId: json['vehicleId'] ?? 0,
       origin: json['origin'] ?? '',

@@ -8,7 +8,7 @@ import 'package:codeminds_mobile_application/tracking/presentation/past_trips_sc
 import 'package:codeminds_mobile_application/assignments/presentation/attendance_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/map_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../tracking/data/remote/trip_service.dart';
+import '../tracking/application/services/trip_service.dart';
 import '../tracking/infrastructure/data_sources/trip_provider.dart';
 import 'widgets/custom_bottom_navigation_bar_Driver.dart';
 

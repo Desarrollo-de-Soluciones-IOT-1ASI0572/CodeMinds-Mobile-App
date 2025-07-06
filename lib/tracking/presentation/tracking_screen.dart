@@ -8,8 +8,8 @@ import 'package:codeminds_mobile_application/notifications/presentation/notifica
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
 import '../../assignments/domain/entities/student.dart';
-import '../../assignments/api/student_service.dart';
-import '../data/remote/trip_service.dart';
+import '../../assignments/application/services/student_service.dart';
+import '../application/services/trip_service.dart';
 
 class TrackingScreen extends StatefulWidget {
   final int selectedIndex;

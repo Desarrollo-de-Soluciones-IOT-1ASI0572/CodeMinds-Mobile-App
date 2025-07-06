@@ -1,4 +1,4 @@
-import '../remote/trip_service.dart';
+import '../../application/services/trip_service.dart';
 
 class TripRepository {
   final TripService tripService;

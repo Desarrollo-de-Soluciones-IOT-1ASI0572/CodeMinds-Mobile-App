@@ -1,19 +1,19 @@
 
 import '../../../assignments/domain/entities/student.dart';
 
-class ActiveTripDTO {
+class ActiveTripModel {
   final int id;
-  final DateTime? startTime; // 👈 Nullable!
+  final DateTime? startTime;
   final List<Student> students;
 
-  ActiveTripDTO({
+  ActiveTripModel({
     required this.id,
-    this.startTime, // 👈 Nullable!
+    this.startTime,
     required this.students,
   });
 
-  factory ActiveTripDTO.fromJson(Map<String, dynamic> json) {
-    return ActiveTripDTO(
+  factory ActiveTripModel.fromJson(Map<String, dynamic> json) {
+    return ActiveTripModel(
       id: json['id'],
       startTime: json['startTime'] != null ? DateTime.parse(json['startTime']) : null,
       students: (json['students'] as List)

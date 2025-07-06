@@ -10,8 +10,8 @@ import 'package:codeminds_mobile_application/profiles/presentation/login_screen.
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:codeminds_mobile_application/profiles/presentation/account_update_screen.dart';
-import '../infrastructure/models/profile.dart';
-import '../data/remote/profile_service.dart';
+import '../domain/entities/profile.dart';
+import '../application/services/profile_service.dart';
 
 class AccountScreen extends StatefulWidget {
   final int selectedIndex;

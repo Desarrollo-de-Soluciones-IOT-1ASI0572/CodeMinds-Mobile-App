@@ -7,7 +7,7 @@ import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_naviga
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entities/student.dart';
-import '../api/student_service.dart';
+import '../application/services/student_service.dart';
 
 class ChildrenScreen extends StatefulWidget {
   const ChildrenScreen({super.key});

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:codeminds_mobile_application/profiles/infrastructure/models/profile.dart';
+import 'package:codeminds_mobile_application/profiles/domain/entities/profile.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../data/remote/trip_service.dart';
-import '../domain/location.dart';
-import '../domain/trip.dart';
+import '../application/services/trip_service.dart';
+import '../domain/entities/location.dart';
+import '../domain/entities/trip.dart';
 import 'trip_map.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

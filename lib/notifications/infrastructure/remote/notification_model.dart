@@ -1,7 +1,6 @@
-﻿
-import '../../domain/entities/notification.dart';
+﻿import '../../domain/entities/notification.dart';
 
-class NotificationDTO {
+class NotificationModel {
   final int id;
   final String message;
   final String status;
@@ -13,7 +12,7 @@ class NotificationDTO {
   final int? tripId;
   final int? studentId;
 
-  NotificationDTO({
+  NotificationModel({
     required this.id,
     required this.message,
     required this.status,
@@ -26,8 +25,8 @@ class NotificationDTO {
     this.studentId,
   });
 
-  factory NotificationDTO.fromJson(Map<String, dynamic> json) {
-    return NotificationDTO(
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    return NotificationModel(
       id: json['id'] ?? 0,
       message: json['message'] ?? '',
       status: json['status'] ?? '',

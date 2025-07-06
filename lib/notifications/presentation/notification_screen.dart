@@ -3,8 +3,7 @@ import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/map_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart' hide Notification;
-import 'package:codeminds_mobile_application/notifications/data/remote/notification_service.dart';
-import 'package:codeminds_mobile_application/notifications/data/repository/notification_repository.dart';
+import 'package:codeminds_mobile_application/notifications/infrastructure/repositories/notification_repository.dart';
 import 'package:codeminds_mobile_application/notifications/domain/entities/notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
@@ -12,6 +11,8 @@ import 'package:codeminds_mobile_application/tracking/presentation/tracking_scre
 import 'package:intl/intl.dart';
 
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar_driver.dart';
+
+import '../application/services/notification_service.dart';
 
 class NotificationScreen extends StatefulWidget {
   final int selectedIndex;

@@ -5,11 +5,11 @@ import 'package:codeminds_mobile_application/shared/app_constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'notification_dto.dart';
+import '../../infrastructure/remote/notification_model.dart';
 
 
 class NotificationService {
-  Future<List<NotificationDTO>> getNotificationsByUserType(
+  Future<List<NotificationModel>> getNotificationsByUserType(
     String userType,
   ) async {
     String? token = await getToken();
@@ -40,7 +40,7 @@ class NotificationService {
     if (response.statusCode == HttpStatus.ok) {
       List<dynamic> jsonResponse = json.decode(response.body);
       return jsonResponse
-          .map((model) => NotificationDTO.fromJson(model))
+          .map((model) => NotificationModel.fromJson(model))
           .toList();
     } else if (response.statusCode == HttpStatus.unauthorized) {
       print('Error 401: No autorizado');
@@ -50,7 +50,7 @@ class NotificationService {
     }
   }
 
-  Future<List<NotificationDTO>> getNotificationsByUserId(int userId) async {
+  Future<List<NotificationModel>> getNotificationsByUserId(int userId) async {
     String? token = await getToken();
     http.Response response;
 
@@ -79,7 +79,7 @@ class NotificationService {
     if (response.statusCode == HttpStatus.ok) {
       List<dynamic> jsonResponse = json.decode(response.body);
       return jsonResponse
-          .map((model) => NotificationDTO.fromJson(model))
+          .map((model) => NotificationModel.fromJson(model))
           .toList();
     } else if (response.statusCode == HttpStatus.unauthorized) {
       print('Error 401: No autorizado');

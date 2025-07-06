@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../profiles/presentation/account_screen.dart';
 import '../../shared/widgets/custom_bottom_navigation_bar_Driver.dart';
-import '../../tracking/data/remote/trip_service.dart';
+import '../../tracking/application/services/trip_service.dart';
 import '../../tracking/presentation/tracking_screen.dart';
 import '../../shared/home_driver_screen.dart';
 import '../../notifications/presentation/notification_screen.dart';

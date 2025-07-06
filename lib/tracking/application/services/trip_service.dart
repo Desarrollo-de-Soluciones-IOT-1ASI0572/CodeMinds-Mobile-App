@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:codeminds_mobile_application/tracking/data/remote/trip_dto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:codeminds_mobile_application/shared/app_constants.dart';
 
-import '../../domain/location.dart';
-import 'ActiveTripDTO.dart';
+import '../../domain/entities/location.dart';
+import '../../infrastructure/remote/active_trip_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'location_dto.dart';
+import '../../infrastructure/remote/location_model.dart';
+import '../../infrastructure/remote/trip_model.dart';
 
 class TripService {
   Future<Map<String, String>> _getHeaders() async {
@@ -132,7 +132,7 @@ Stack Trace: $stackTrace
         List<dynamic> jsonResponse = json.decode(response.body);
 
         final locations = jsonResponse
-            .map((model) => Location.fromDTO(LocationDTO.fromJson(model)))
+            .map((model) => Location.fromDTO(LocationModel.fromJson(model)))
             .toList();
 
         debugPrint(
@@ -183,7 +183,7 @@ Stack Trace: $stackTrace
     }
   }
 
-  Future<List<TripDTO>> getCompletedTripsByDriver(int driverId) async {
+  Future<List<TripModel>> getCompletedTripsByDriver(int driverId) async {
     final url =
         '${AppConstants.baseUrl}${AppConstants.completedTripsByDriverEndpoint}/$driverId';
     debugPrint('🌐 Calling: $url');
@@ -196,7 +196,7 @@ Stack Trace: $stackTrace
 
       if (response.statusCode == HttpStatus.ok) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => TripDTO.fromJson(json)).toList();
+        return data.map((json) => TripModel.fromJson(json)).toList();
       }
       debugPrint('⚠️ Error ${response.statusCode}: ${response.body}');
       throw Exception(
@@ -231,7 +231,7 @@ Stack Trace: $stackTrace
     }
   }
 
-  Future<List<ActiveTripDTO>> getActiveTripByDriver(int driverId) async {
+  Future<List<ActiveTripModel>> getActiveTripByDriver(int driverId) async {
     final url =
         '${AppConstants.baseUrl}/trips/active/driver/$driverId';
     debugPrint('🌐 Calling active trip endpoint: $url');
@@ -244,7 +244,7 @@ Stack Trace: $stackTrace
 
       if (response.statusCode == HttpStatus.ok) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => ActiveTripDTO.fromJson(json)).toList();
+        return data.map((json) => ActiveTripModel.fromJson(json)).toList();
       } else if (response.statusCode == HttpStatus.notFound) {
         return [];
       } else {

@@ -1,11 +1,14 @@
-class LocationDTO {
+
+import '../../infrastructure/remote/location_model.dart';
+
+class Location {
   final int id;
   final int vehicleId;
   final double latitude;
   final double longitude;
   final double speed;
 
-  LocationDTO({
+  Location({
     required this.id,
     required this.vehicleId,
     required this.latitude,
@@ -13,13 +16,13 @@ class LocationDTO {
     required this.speed,
   });
 
-  factory LocationDTO.fromJson(Map<String, dynamic> json) {
-    return LocationDTO(
-      id: json['id'],
-      vehicleId: json['vehicleId'],
-      latitude: json['latitude'].toDouble(),
-      longitude: json['longitude'].toDouble(),
-      speed: json['speed'].toDouble(),
+  factory Location.fromDTO(LocationModel dto) {
+    return Location(
+      id: dto.id,
+      vehicleId: dto.vehicleId,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
+      speed: dto.speed,
     );
   }
 

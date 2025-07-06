@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:codeminds_mobile_application/assignments/domain/entities/student.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../shared/app_constants.dart';
+import '../../../shared/app_constants.dart';
 
 class StudentService {
   Future<String?> getToken() async {
