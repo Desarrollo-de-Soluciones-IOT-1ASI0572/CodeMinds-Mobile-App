@@ -6,7 +6,9 @@ class StudentModel {
   final String schoolAddress;
   final String studentPhotoUrl;
   final Wristband? wristband;
-  final ParentProfile? parentProfile;
+  //final ParentProfile? parentProfile;
+  final int parentProfileId;
+  final int? driverId;
 
   StudentModel({
     required this.id,
@@ -16,7 +18,8 @@ class StudentModel {
     required this.schoolAddress,
     required this.studentPhotoUrl,
     this.wristband,
-    this.parentProfile,
+    required this.parentProfileId,
+    this.driverId,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -30,9 +33,10 @@ class StudentModel {
       wristband: json['wristband'] != null
           ? Wristband.fromJson(json['wristband'])
           : null,
-      parentProfile: json['parentProfile'] != null
-          ? ParentProfile.fromJson(json['parentProfile'])
-          : null,
+      parentProfileId: json['parentProfile'] is int
+          ? json['parentProfile']
+          : json['parentProfile']?['id'] ?? 0,
+      driverId: json['driverId'] as int?,
     );
   }
 }

@@ -7,9 +7,8 @@ import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/shared/notification_screen.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
-
-import '../../student/data/remote/student.dart';
-import '../../student/data/remote/student_service.dart';
+import '../../assignments/domain/entities/student.dart';
+import '../../assignments/api/student_service.dart';
 import '../data/remote/trip_service.dart';
 
 class TrackingScreen extends StatefulWidget {
