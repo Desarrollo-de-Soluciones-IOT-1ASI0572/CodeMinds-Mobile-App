@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
 import 'package:codeminds_mobile_application/shared/notification_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/past_trips_screen.dart';
-import 'package:codeminds_mobile_application/student/presentation/attendance_screen.dart';
+import 'package:codeminds_mobile_application/assignments/presentation/attendance_screen.dart';
 import 'package:codeminds_mobile_application/tracking/presentation/map_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../tracking/data/remote/trip_service.dart';
