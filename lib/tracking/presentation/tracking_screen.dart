@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
@@ -32,6 +33,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   Set<Marker> _markers = {};
   bool _autoRefresh = false;
   Timer? _refreshTimer;
+  String _currentAddress = "Obteniendo dirección...";
 
   @override
   void initState() {
@@ -79,12 +81,34 @@ class _TrackingScreenState extends State<TrackingScreen> {
           locationData['location']['longitude']
       );
 
+      // Convertir coordenadas a dirección
+      try {
+        final placemarks = await placemarkFromCoordinates(
+            newPosition.latitude,
+            newPosition.longitude
+        );
+
+        final place = placemarks.first;
+        setState(() {
+          _currentAddress = [
+            if (place.street != null) place.street,
+            if (place.locality != null) place.locality,
+            if (place.postalCode != null) place.postalCode,
+            if (place.country != null) place.country,
+          ].where((part) => part != null).join(', ');
+        });
+      } catch (e) {
+        setState(() {
+          _currentAddress = "Coordenadas: ${newPosition.latitude.toStringAsFixed(5)}, "
+              "${newPosition.longitude.toStringAsFixed(5)}";
+        });
+      }
+
       setState(() {
         _vehiclePosition = newPosition;
         _currentSpeed = locationData['speed'];
         _trackingStatus = "En camino";
         _isTrackingLoading = false;
-
         _markers = {
           Marker(
             markerId: const MarkerId('vehicle'),
@@ -92,13 +116,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
             infoWindow: InfoWindow(
               title: 'Vehículo escolar',
-              snippet: 'Velocidad: ${_currentSpeed?.toStringAsFixed(1) ?? '--'} km/h',
+              snippet: _currentAddress, // Mostrar dirección en el marcador
             ),
           )
         };
       });
 
-      // Move camera to new position with appropriate zoom
       _mapController?.animateCamera(
         CameraUpdate.newLatLngZoom(newPosition, 15),
       );
@@ -109,9 +132,11 @@ class _TrackingScreenState extends State<TrackingScreen> {
         _currentSpeed = null;
         _isTrackingLoading = false;
         _markers = {};
+        _currentAddress = "Dirección no disponible";
       });
     }
   }
+
 
   void _toggleAutoRefresh() {
     setState(() {
@@ -315,17 +340,20 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   if (_selectedChild != null) ...[
                     // Address Info
                     _buildInfoCard(
-                      'Dirección',
+                      'Ubicación Actual',
                       Row(
                         children: [
                           Icon(
-                            Icons.home,
+                            Icons.location_pin,
                             size: 20,
                             color: colorScheme.primary,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(_selectedChild!.homeAddress),
+                            child: Text(
+                              _currentAddress,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
                         ],
                       ),
