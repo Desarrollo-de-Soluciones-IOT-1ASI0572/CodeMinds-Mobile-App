@@ -151,7 +151,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
     final tripId = _tripProvider.getCurrentTripId(_currentDriverId!);
     if (tripId == null) return;
 
-    final success = await TripService().startTrip(tripId);
+    final success = await TripService().startTrip(tripId);  // Pasamos el tripId por la URL
     if (success) {
       _tripProvider.startTrip(_currentDriverId!);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +170,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
     final tripId = _tripProvider.getCurrentTripId(_currentDriverId!);
     if (tripId == null) return;
 
-    final success = await TripService().endTrip(tripId);
+    final success = await TripService().endTrip(tripId);  // Pasamos el tripId por la URL
     if (success) {
       _tripProvider.endTrip(_currentDriverId!);
       _tripProvider.resetTrip(_currentDriverId!);
@@ -186,6 +186,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
       );
     }
   }
+
 
   bool _shouldShowTripControls() {
     return _currentDriverId != null &&

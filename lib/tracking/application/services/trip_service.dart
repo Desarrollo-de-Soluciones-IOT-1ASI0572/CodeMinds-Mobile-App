@@ -264,14 +264,13 @@ Stack Trace: $stackTrace
   }
 
   Future<bool> startTrip(int tripId) async {
-    final url = '${AppConstants.baseUrl}${AppConstants.startTripEndpoint}';
+    final url = '${AppConstants.baseUrl}/trips/$tripId/start'; // URL modificada con tripId en la URI
     debugPrint('🚦 Intentando iniciar viaje ID: $tripId en $url');
 
     try {
       final response = await http.put(
         Uri.parse(url),
         headers: await _getHeaders(),
-        body: jsonEncode({'tripId': tripId}),
       );
 
       debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
@@ -290,14 +289,13 @@ Stack Trace: $stackTrace
   }
 
   Future<bool> endTrip(int tripId) async {
-    final url = '${AppConstants.baseUrl}${AppConstants.endTripEndpoint}';
+    final url = '${AppConstants.baseUrl}/trips/$tripId/end'; // URL modificada con tripId en la URI
     debugPrint('🛑 Intentando finalizar viaje ID: $tripId en $url');
 
     try {
       final response = await http.put(
         Uri.parse(url),
         headers: await _getHeaders(),
-        body: jsonEncode({'tripId': tripId}),
       );
 
       debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
