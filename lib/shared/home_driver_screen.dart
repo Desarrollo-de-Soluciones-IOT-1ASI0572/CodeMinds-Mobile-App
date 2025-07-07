@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
 import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
@@ -88,30 +86,37 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Nuevo Viaje"),
+        title: const Text("New Trip"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: originController,
-              decoration: const InputDecoration(labelText: "Origen (ej: Colegio)"),
+              decoration: const InputDecoration(
+                labelText: "Origin (e.g., School)",
+                border: OutlineInputBorder(),
+              ),
             ),
+            const SizedBox(height: 16),
             TextField(
               controller: destinationController,
-              decoration: const InputDecoration(labelText: "Destino (ej: Urbanización)"),
+              decoration: const InputDecoration(
+                labelText: "Destination (e.g., Residential Area)",
+                border: OutlineInputBorder(),
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancelar"),
+            child: const Text("Cancel"),
           ),
           ElevatedButton(
             onPressed: () async {
               if (originController.text.isEmpty || destinationController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("¡Ingresa origen y destino!")),
+                  const SnackBar(content: Text("Enter origin and destination!")),
                 );
                 return;
               }
@@ -134,11 +139,21 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                   destinationController.text,
                 );
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("¡Viaje creado (ID: $tripId)!")),
+                  SnackBar(
+                    content: Text("Trip created (ID: $tripId)!"),
+                    behavior: SnackBarBehavior.floating,
+                  ),
                 );
               }
             },
-            child: const Text("Crear Viaje"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text("Create Trip"
+            ),
           ),
         ],
       ),
@@ -151,15 +166,21 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
     final tripId = _tripProvider.getCurrentTripId(_currentDriverId!);
     if (tripId == null) return;
 
-    final success = await TripService().startTrip(tripId);  // Pasamos el tripId por la URL
+    final success = await TripService().startTrip(tripId);
     if (success) {
       _tripProvider.startTrip(_currentDriverId!);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("¡Viaje iniciado!")),
+        const SnackBar(
+          content: Text("¡Viaje iniciado!"),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error al iniciar viaje")),
+        const SnackBar(
+          content: Text("Error al iniciar viaje"),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
@@ -170,7 +191,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
     final tripId = _tripProvider.getCurrentTripId(_currentDriverId!);
     if (tripId == null) return;
 
-    final success = await TripService().endTrip(tripId);  // Pasamos el tripId por la URL
+    final success = await TripService().endTrip(tripId);
     if (success) {
       _tripProvider.endTrip(_currentDriverId!);
       _tripProvider.resetTrip(_currentDriverId!);
@@ -178,15 +199,20 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
       setState(() {});
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("¡Viaje finalizado!")),
+        const SnackBar(
+          content: Text("¡Viaje finalizado!"),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error al finalizar viaje")),
+        const SnackBar(
+          content: Text("Error al finalizar viaje"),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
-
 
   bool _shouldShowTripControls() {
     return _currentDriverId != null &&
@@ -198,14 +224,16 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
     final isTripStarted = _currentDriverId != null
         ? _tripProvider.isTripStarted(_currentDriverId!)
         : false;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD),
+      backgroundColor: Colors.white,
       floatingActionButton: _currentDriverId != null
           ? FloatingActionButton(
         onPressed: () => _showCreateTripDialog(context),
         child: const Icon(Icons.add),
         tooltip: 'Crear Viaje',
+        backgroundColor: theme.colorScheme.primary,
       )
           : null,
       body: SafeArea(
@@ -215,145 +243,130 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/CodeMinds-Logo.png',
-                      height: 70,
-                      width: 70,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Welcome Again!\n${widget.name}',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                // Header with logo and welcome message
                 Center(
                   child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: () {},
-                        child: Image.asset(
-                          'assets/images/EmergencyButton.png',
-                          height: 100,
-                          width: 100,
-                        ),
+                      Image.asset(
+                        'assets/images/CodeMinds-Logo.png',
+                        height: 80,
+                        width: 80,
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Emergency Button',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        'Welcome again,',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        widget.name,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Past Trips',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => PastTripsScreen()),
-                            );
-                          },
-                          child: Image.asset(
-                            'assets/images/PastTrips.png',
-                            height: 100,
-                            width: 100,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text(
-                          'Attendance',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AttendanceScreen(),
-                              ),
-                            );
-                          },
-                          child: Image.asset(
-                            'assets/images/Attendace.png',
-                            height: 100,
-                            width: 100,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 250,
-                  child: FlutterMap(
-                    options: MapOptions(
-                      center: LatLng(-12.0906, -77.0220),
-                      zoom: 15,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        subdomains: ['a', 'b', 'c'],
-                      ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            point: LatLng(-12.0906, -77.0220),
-                            width: 80,
+                const SizedBox(height: 24),
+
+                // Emergency Button
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      // Handle emergency button press
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            'assets/images/EmergencyButton.png',
                             height: 80,
-                            child: const Icon(
-                              Icons.location_pin,
-                              color: Colors.red,
-                              size: 40,
+                            width: 80,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Emergency Button',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
+                const SizedBox(height: 24),
+
+                // Quick Actions Grid
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  children: [
+                    // Past Trips Card
+                    _buildActionCard(
+                      context,
+                      'assets/images/PastTrips.png',
+                      'Past Trips',
+                          () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => PastTripsScreen()),
+                        );
+                      },
+                    ),
+                    // Attendance Card
+                    _buildActionCard(
+                      context,
+                      'assets/images/Attendace.png',
+                      'Attendance',
+                          () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AttendanceScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Trip Controls
                 if (_shouldShowTripControls() && !isTripStarted)
                   ElevatedButton(
                     onPressed: _startTrip,
-                    child: const Text("Iniciar Viaje"),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text("Start Trip"),
                   ),
                 if (_shouldShowTripControls() && isTripStarted)
                   ElevatedButton(
                     onPressed: _endTrip,
                     style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
                       backgroundColor: Colors.red,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text("Terminar Viaje"),
+                    child: const Text("End Trip"),
                   ),
               ],
             ),
@@ -363,6 +376,43 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
       bottomNavigationBar: CustomBottomNavigationBarDriver(
         currentIndex: _selectedIndex,
         onTap: _onNavTap,
+      ),
+    );
+  }
+
+  Widget _buildActionCard(
+      BuildContext context, String imagePath, String title, VoidCallback onTap) {
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                imagePath,
+                height: 60,
+                width: 60,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

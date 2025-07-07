@@ -242,7 +242,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Seguimiento en Tiempo Real'),
+        title: const Text('Real-Time Tracking'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -312,7 +312,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 children: [
                   // Student Selection
                   _buildInfoCard(
-                    'Estudiante',
+                    'Student',
                     DropdownButtonFormField<Student>(
                       value: _selectedChild,
                       decoration: InputDecoration(
@@ -340,7 +340,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   if (_selectedChild != null) ...[
                     // Address Info
                     _buildInfoCard(
-                      'Ubicación Actual',
+                      'Current Location',
                       Row(
                         children: [
                           Icon(
@@ -361,7 +361,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
                     // School Info
                     _buildInfoCard(
-                      'Colegio',
+                      'School',
                       Row(
                         children: [
                           Icon(
@@ -382,7 +382,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       children: [
                         Expanded(
                           child: _buildInfoCard(
-                            'Estado',
+                            'Status',
                             Row(
                               children: [
                                 Icon(
@@ -401,7 +401,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: _buildInfoCard(
-                            'Velocidad',
+                            'Speed',
                             Row(
                               children: [
                                 Icon(
@@ -424,7 +424,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
                     // Auto Refresh Toggle
                     SwitchListTile(
-                      title: const Text('Actualización automática'),
+                      title: const Text('Auto Update'),
                       value: _autoRefresh,
                       onChanged: (value) => _toggleAutoRefresh(),
                       secondary: Icon(

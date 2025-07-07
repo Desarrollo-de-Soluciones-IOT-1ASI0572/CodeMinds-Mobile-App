@@ -118,11 +118,12 @@ class _PastTripsScreenState extends State<PastTripsScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surfaceVariant,
+      backgroundColor: Colors.white,  // Fondo blanco
       appBar: AppBar(
         title: const Text('Past Trips'),
         centerTitle: true,
         elevation: 0,
+        backgroundColor: Colors.white,  // Color de la barra de navegación
       ),
       body: SafeArea(
         child: Padding(

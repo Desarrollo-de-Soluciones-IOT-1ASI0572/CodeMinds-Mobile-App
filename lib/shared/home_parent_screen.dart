@@ -4,15 +4,12 @@ import 'package:codeminds_mobile_application/notifications/presentation/notifica
 import 'package:codeminds_mobile_application/tracking/presentation/tracking_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart' hide Notification;
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:codeminds_mobile_application/notifications/infrastructure/repositories/notification_repository.dart';
 import 'package:codeminds_mobile_application/notifications/domain/entities/notification.dart';
 import 'package:codeminds_mobile_application/assignments/presentation/children_screen.dart';
 import '../notifications/application/services/notification_service.dart';
-import '../tracking/application/services/trip_service.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class HomeParentScreen extends StatefulWidget {
   final String name;
@@ -21,7 +18,7 @@ class HomeParentScreen extends StatefulWidget {
 
   const HomeParentScreen({
     super.key,
-    this.name = "Default Name",
+    this.name = "parent", // Default changed to match your image
     required this.onSeeMoreNotifications,
     required this.selectedIndex,
   });
@@ -33,14 +30,7 @@ class HomeParentScreen extends StatefulWidget {
 class _HomeParentScreenState extends State<HomeParentScreen> {
   List<Student> _children = [];
   List<Notification> _notifications = [];
-  final int _studentId = 16;
-
-  late GoogleMapController _mapController;
-  final LatLng _initialPosition = const LatLng(-12.0464, -77.0428);
-  final double _initialZoom = 15.0;
-  Set<Marker> _markers = {};
-  LatLng? _vehicleLocation;
-  BitmapDescriptor? _vehicleIcon;
+  bool _isLoading = true;
 
   int _selectedIndex = 0;
 
@@ -90,87 +80,126 @@ class _HomeParentScreenState extends State<HomeParentScreen> {
     super.initState();
     _selectedIndex = widget.selectedIndex;
     _loadData();
-    _loadCustomMarker();
-    _loadVehicleLocation();
-  }
-
-  Future<void> _loadCustomMarker() async {
-    try {
-      _vehicleIcon = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(size: Size(12, 12)),
-        'assets/icons/bus_marker_2.png',
-      );
-    } catch (e) {
-      _vehicleIcon =
-          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
-      debugPrint('Error cargando ícono personalizado: $e');
-    }
-  }
-
-  Future<void> _loadVehicleLocation() async {
-    try {
-      final locationData =
-          await TripService().getCurrentVehicleLocation(_studentId);
-
-      if (locationData != null && locationData['location'] != null) {
-        final lat = locationData['location']['latitude'] as double;
-        final lng = locationData['location']['longitude'] as double;
-
-        setState(() {
-          _vehicleLocation = LatLng(lat, lng);
-          _markers = {
-            Marker(
-              markerId: const MarkerId('vehicle_location'),
-              position: _vehicleLocation!,
-              icon: _vehicleIcon ??
-                  BitmapDescriptor.defaultMarkerWithHue(
-                      BitmapDescriptor.hueBlue),
-              infoWindow: const InfoWindow(title: 'Vehículo escolar'),
-              rotation: locationData['speed'] != null
-                  ? (locationData['speed'] as double)
-                  : 0.0,
-            ),
-          };
-        });
-
-        if (_mapController != null) {
-          _mapController.animateCamera(
-            CameraUpdate.newLatLng(_vehicleLocation!),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('Error al cargar ubicación: $e');
-    }
   }
 
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('user_id');
 
-    List<Notification> notifications = await NotificationRepository(
-      notificationService: NotificationService(),
-    ).getNotificationsByUserId(userId!);
+    try {
+      final notifications = await NotificationRepository(
+        notificationService: NotificationService(),
+      ).getNotificationsByUserId(userId!);
 
-    List<Student> children =
-        await StudentService().getStudentsByParentUserId(userId);
+      // Ordenar notificaciones por fecha (más recientes primero)
+      notifications.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-    setState(() {
-      _notifications = notifications;
-      _children = children;
-    });
+      final children = await StudentService().getStudentsByParentUserId(userId);
+
+      setState(() {
+        _notifications = notifications;
+        _children = children;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error loading data")),
+      );
+    }
   }
 
-  @override
-  void dispose() {
-    _mapController.dispose();
-    super.dispose();
+  Widget _buildChildCard(Student student) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.cyan[100],
+              backgroundImage: student.studentPhotoUrl != null &&
+                  student.studentPhotoUrl.isNotEmpty
+                  ? NetworkImage(student.studentPhotoUrl)
+                  : const AssetImage('assets/images/circle-user.png')
+              as ImageProvider,
+              child: student.studentPhotoUrl == null ||
+                  student.studentPhotoUrl.isEmpty
+                  ? const Icon(
+                Icons.person,
+                size: 30,
+                color: Colors.white,
+              )
+                  : null,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${student.name} ${student.lastName}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationItem(Notification notification) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.notifications_none,
+                size: 16,
+                color: Colors.blue,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                notification.message,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -178,147 +207,79 @@ class _HomeParentScreenState extends State<HomeParentScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo y texto de bienvenida
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/CodeMinds-Logo.png',
-                      height: 70,
-                      width: 70,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Welcome again!\n${widget.name}',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black, // Color de texto oscuro
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Mapa con ubicación del vehículo
-                SizedBox(
-                  height: 200,
-                  child: Stack(
+                // Welcome Header (centered)
+                Center(
+                  child: Column(
                     children: [
-                      GoogleMap(
-                        onMapCreated: (controller) {
-                          _mapController = controller;
-                          if (_vehicleLocation != null) {
-                            _mapController.animateCamera(
-                              CameraUpdate.newLatLng(_vehicleLocation!),
-                            );
-                          }
-                        },
-                        initialCameraPosition: CameraPosition(
-                          target: _vehicleLocation ?? _initialPosition,
-                          zoom: _initialZoom,
-                        ),
-                        markers: _markers,
-                        mapType: MapType.normal,
-                        myLocationEnabled: true,
-                        myLocationButtonEnabled: false,
-                        zoomControlsEnabled: false,
+                      Image.asset(
+                        'assets/images/CodeMinds-Logo.png',
+                        height: 80,
+                        width: 80,
                       ),
-                      Positioned(
-                        right: 10,
-                        bottom: 10,
-                        child: FloatingActionButton.small(
-                          onPressed: _loadVehicleLocation,
-                          child: const Icon(Icons.refresh),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Welcome again,',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        widget.name,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
-                // Sección de Children
-                const Text(
-                  'Children',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black, // Color de texto oscuro
-                  ),
-                ),
-                const SizedBox(height: 10),
-
+                // Children Section
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Row(
-                        children: _children.take(2).map((student) {
-                          return Expanded(
-                            child: Column(
-                              children: [
-                                CircleAvatar(
-                                  radius: 30,
-                                  backgroundColor: Colors.cyan[100],
-                                  backgroundImage: student.studentPhotoUrl !=
-                                              null &&
-                                          student.studentPhotoUrl.isNotEmpty
-                                      ? NetworkImage(student.studentPhotoUrl)
-                                      : const AssetImage(
-                                              'assets/images/circle-user.png')
-                                          as ImageProvider,
-                                  child: student.studentPhotoUrl == null ||
-                                          student.studentPhotoUrl.isEmpty
-                                      ? const Icon(
-                                          Icons.person,
-                                          size: 30,
-                                          color: Colors.white,
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  '${student.name} ${student.lastName}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        Colors.black, // Color de texto oscuro
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                    Text(
+                      'Children',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const ChildrenScreen()),
-                        );
-                      },
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ChildrenScreen()),
+                      ),
                       child: const Text('View All'),
                     ),
                   ],
                 ),
-                const SizedBox(height: 25),
+                const SizedBox(height: 12),
 
-                // Notificaciones
+                // Children Grid
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  children: _children
+                      .take(2)
+                      .map((child) => _buildChildCard(child))
+                      .toList(),
+                ),
+                const SizedBox(height: 24),
+
+                // Notifications Section
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Notifications',
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black, // Color de texto oscuro
                       ),
                     ),
                     TextButton(
@@ -327,32 +288,24 @@ class _HomeParentScreenState extends State<HomeParentScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                Column(
-                  children: _notifications.isEmpty
-                      ? [const Center(child: CircularProgressIndicator())]
-                      : _notifications.take(2).map((notification) {
-                          return Container(
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black26),
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.white,
-                            ),
-                            child: Text(
-                              notification.message,
-                              style: const TextStyle(
-                                color: Colors.black, // Color de texto oscuro
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                // Notifications List
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _notifications.isEmpty
+                    ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    'No notifications',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                )
+                    : Column(
+                  children: _notifications
+                      .take(2)
+                      .map((n) => _buildNotificationItem(n))
+                      .toList(),
                 ),
               ],
             ),

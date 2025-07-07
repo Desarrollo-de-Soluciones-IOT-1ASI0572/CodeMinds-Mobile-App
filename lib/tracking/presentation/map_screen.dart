@@ -329,13 +329,13 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mapa del Viaje'),
+        title: const Text('Trip Map'),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadRoute,
-            tooltip: 'Actualizar ruta',
+            tooltip: 'Update Route',
           ),
         ],
       ),
@@ -425,7 +425,7 @@ class _MapScreenState extends State<MapScreen> {
                         Expanded(
                           child: _buildInfoCard(
                             Icons.flag,
-                            'Origen',
+                            'Origin',
                             _originText,
                             colorScheme.primary,
                           ),
@@ -434,7 +434,7 @@ class _MapScreenState extends State<MapScreen> {
                         Expanded(
                           child: _buildInfoCard(
                             Icons.flag_circle,
-                            'Destino',
+                            'Destination',
                             _destinationText,
                             colorScheme.primary,
                           ),
@@ -446,17 +446,17 @@ class _MapScreenState extends State<MapScreen> {
                       children: [
                         Expanded(
                           child: _buildInfoCard(
-                            _status == 'En camino' ? Icons.directions_car : Icons.access_time,
-                            'Estado',
+                            _status == 'En Route' ? Icons.directions_car : Icons.access_time,
+                            'Status',
                             _status,
-                            _status == 'En camino' ? Colors.green : Colors.orange,
+                            _status == 'En Route' ? Colors.green : Colors.orange,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: _buildInfoCard(
                             Icons.speed,
-                            'Distancia',
+                            'Distance',
                             _distance,
                             colorScheme.primary,
                           ),
@@ -470,7 +470,7 @@ class _MapScreenState extends State<MapScreen> {
                       children: [
                         Expanded(
                           child: SwitchListTile(
-                            title: const Text('Actualización automática'),
+                            title: const Text('Auto Update'),
                             value: _autoRefresh,
                             onChanged: (value) => _toggleAutoRefresh(),
                             contentPadding: EdgeInsets.zero,
@@ -486,7 +486,7 @@ class _MapScreenState extends State<MapScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             icon: const Icon(Icons.warning),
-                            label: const Text('Emergencia'),
+                            label: const Text('Emergency'),
                           ),
                         ),
                       ],

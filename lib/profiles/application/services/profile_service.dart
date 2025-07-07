@@ -4,9 +4,13 @@ import 'package:codeminds_mobile_application/profiles/domain/entities/profile.da
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../shared/app_constants.dart';
+
 class ProfileService {
-  final String baseUrl =
-      'https://edugo-service-de983aa97099.herokuapp.com/api/v1';
+  //final String baseUrl =
+  //    'https://edugo-service-de983aa97099.herokuapp.com/api/v1';
+
+  final String baseUrl = AppConstants.baseUrl;
 
   Future<ProfileModel> fetchProfile(int userId) async {
     String? token = await getToken();
