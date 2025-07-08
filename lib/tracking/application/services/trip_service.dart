@@ -64,7 +64,8 @@ Headers: ${response.headers}
 Body: ${response.body.isNotEmpty ? response.body : 'EMPTY RESPONSE'}
 ''');
 
-      if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.created) {
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.created) {
         final tripData = jsonDecode(response.body);
         debugPrint('✅ Viaje creado exitosamente. ID: ${tripData['id']}');
         return tripData['id'];
@@ -119,14 +120,13 @@ Stack Trace: $stackTrace
   }
 
   Future<List<Location>> getTripLocations(int tripId) async {
-    final url =
-        '${AppConstants.baseUrl}/locations/trip/$tripId';
+    final url = '${AppConstants.baseUrl}/locations/trip/$tripId';
     debugPrint('🔍 Llamando a: $url');
 
     try {
       // ✅ Asegúrate de pasar el token en los headers
       http.Response response =
-      await http.get(Uri.parse(url), headers: await _getHeaders());
+          await http.get(Uri.parse(url), headers: await _getHeaders());
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> jsonResponse = json.decode(response.body);
@@ -155,8 +155,10 @@ Stack Trace: $stackTrace
   }
 
   Future<Map<String, dynamic>> getCurrentVehicleLocation(int studentId) async {
-    final url = '${AppConstants.baseUrl}/vehicles/students/$studentId/current-vehicle-location';
-    debugPrint('🚗 Obteniendo ubicación del vehículo para estudiante $studentId');
+    final url =
+        '${AppConstants.baseUrl}/vehicles/students/$studentId/current-vehicle-location';
+    debugPrint(
+        '🚗 Obteniendo ubicación del vehículo para estudiante $studentId');
 
     try {
       final response = await http.get(
@@ -164,7 +166,8 @@ Stack Trace: $stackTrace
         headers: await _getHeaders(),
       );
 
-      debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
+      debugPrint(
+          '🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
 
       if (response.statusCode == HttpStatus.ok) {
         final data = jsonDecode(response.body);
@@ -208,7 +211,8 @@ Stack Trace: $stackTrace
   }
 
   Future<List<Map<String, dynamic>>> getTripStudents(int tripId) async {
-    final url = '${AppConstants.baseUrl}${AppConstants.tripStudentsEndpoint}/$tripId/students';
+    final url =
+        '${AppConstants.baseUrl}${AppConstants.tripStudentsEndpoint}/$tripId/students';
     debugPrint('📘 Llamando a: $url');
 
     try {
@@ -219,7 +223,8 @@ Stack Trace: $stackTrace
 
       if (response.statusCode == HttpStatus.ok) {
         final List<dynamic> data = jsonDecode(response.body);
-        debugPrint('✅ ${data.length} estudiantes recibidos para tripId=$tripId');
+        debugPrint(
+            '✅ ${data.length} estudiantes recibidos para tripId=$tripId');
         return data.cast<Map<String, dynamic>>();
       } else {
         debugPrint('⚠️ Error ${response.statusCode}: ${response.body}');
@@ -232,8 +237,7 @@ Stack Trace: $stackTrace
   }
 
   Future<List<ActiveTripModel>> getActiveTripByDriver(int driverId) async {
-    final url =
-        '${AppConstants.baseUrl}/trips/active/driver/$driverId';
+    final url = '${AppConstants.baseUrl}/trips/active/driver/$driverId';
     debugPrint('🌐 Calling active trip endpoint: $url');
 
     try {
@@ -264,19 +268,24 @@ Stack Trace: $stackTrace
   }
 
   Future<bool> startTrip(int tripId) async {
-    final url = '${AppConstants.baseUrl}/trips/$tripId/start'; // URL modificada con tripId en la URI
+    final url = '${AppConstants.baseUrl}/trips/$tripId/status';
     debugPrint('🚦 Intentando iniciar viaje ID: $tripId en $url');
 
     try {
+      final requestBody = {'status': 'IN_PROGRESS'};
+
       final response = await http.put(
         Uri.parse(url),
         headers: await _getHeaders(),
+        body: jsonEncode(requestBody),
       );
 
-      debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
+      debugPrint(
+          '🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
 
-      if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.created) {
-        debugPrint('✅ Viaje $tripId iniciado con éxito. Estado: ${jsonDecode(response.body)['status']}');
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.created) {
+        debugPrint('✅ Viaje $tripId iniciado con éxito. Estado: IN_PROGRESS');
         return true;
       } else {
         debugPrint('❌ Error al iniciar viaje. Código: ${response.statusCode}');
@@ -289,22 +298,29 @@ Stack Trace: $stackTrace
   }
 
   Future<bool> endTrip(int tripId) async {
-    final url = '${AppConstants.baseUrl}/trips/$tripId/end'; // URL modificada con tripId en la URI
+    final url = '${AppConstants.baseUrl}/trips/$tripId/status';
     debugPrint('🛑 Intentando finalizar viaje ID: $tripId en $url');
 
     try {
+      final requestBody = {'status': 'COMPLETED'};
+
       final response = await http.put(
         Uri.parse(url),
         headers: await _getHeaders(),
+        body: jsonEncode(requestBody),
       );
 
-      debugPrint('🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
+      debugPrint(
+          '🔔 Respuesta del servidor: ${response.statusCode} - ${response.body}');
 
-      if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.accepted) {
-        debugPrint('✅ Viaje $tripId finalizado correctamente');
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.accepted) {
+        debugPrint(
+            '✅ Viaje $tripId finalizado correctamente. Estado: COMPLETED');
         return true;
       } else {
-        debugPrint('❌ Error al finalizar viaje. Código: ${response.statusCode}');
+        debugPrint(
+            '❌ Error al finalizar viaje. Código: ${response.statusCode}');
         return false;
       }
     } catch (e) {
@@ -320,7 +336,8 @@ Stack Trace: $stackTrace
     DateTime? boardedAt,
     DateTime? exitedAt,
   }) async {
-    final url = '${AppConstants.baseUrl}${AppConstants.tripStudentsEndpoint}/$tripId/students/$studentId';
+    final url =
+        '${AppConstants.baseUrl}${AppConstants.tripStudentsEndpoint}/$tripId/students/$studentId';
     try {
       final response = await http.patch(
         Uri.parse(url),
@@ -337,8 +354,4 @@ Stack Trace: $stackTrace
       return false;
     }
   }
-
-
-
-
 }
