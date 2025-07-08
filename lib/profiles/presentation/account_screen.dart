@@ -56,7 +56,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void _onNavTap(int index) {
+  Future<void> _onNavTap(int index) async {
     if (_selectedIndex == index) return;
     setState(() {
       _selectedIndex = index;
@@ -78,9 +78,11 @@ class _AccountScreenState extends State<AccountScreen> {
                 builder: (context) => const TrackingScreen(selectedIndex: 1)),
           );
         } else if (_role == "ROLE_DRIVER") {
+          final prefs = await SharedPreferences.getInstance();
+          final driverId = prefs.getInt('user_id');
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MapScreen()),
+            MaterialPageRoute(builder: (context) => MapScreen(driverId: driverId!)),
           );
         }
         break;
@@ -100,6 +102,7 @@ class _AccountScreenState extends State<AccountScreen> {
         break;
     }
   }
+
 
   @override
   void initState() {

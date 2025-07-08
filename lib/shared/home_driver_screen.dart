@@ -56,16 +56,21 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
       case 0:
         break;
       case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MapScreen()),
-        );
+        if (_currentDriverId != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MapScreen(driverId: _currentDriverId!),
+            ),
+          );
+        }
         break;
       case 2:
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const NotificationScreen(selectedIndex: 2)),
+              builder: (context) =>
+              const NotificationScreen(selectedIndex: 2)),
         );
         break;
       case 3:
@@ -77,6 +82,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
         break;
     }
   }
+
 
   void _showCreateTripDialog(BuildContext context) {
     final TextEditingController originController = TextEditingController();

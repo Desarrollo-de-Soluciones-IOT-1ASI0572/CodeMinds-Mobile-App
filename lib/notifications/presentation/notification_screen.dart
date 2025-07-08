@@ -136,7 +136,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  void _onNavTap(int index) {
+  Future<void> _onNavTap(int index) async {
     if (_selectedIndex == index) return;
     setState(() {
       _selectedIndex = index;
@@ -155,12 +155,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => const TrackingScreen(selectedIndex: 1)),
+              builder: (context) => const TrackingScreen(selectedIndex: 1),
+            ),
           );
         } else if (_role == "ROLE_DRIVER") {
+          final prefs = await SharedPreferences.getInstance();
+          final driverId = prefs.getInt('user_id');
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MapScreen()),
+            MaterialPageRoute(
+              builder: (context) => MapScreen(driverId: driverId!),
+            ),
           );
         }
         break;
@@ -168,18 +173,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => const NotificationScreen(selectedIndex: 2)),
+              builder: (context) =>
+              const NotificationScreen(selectedIndex: 2)),
         );
         break;
       case 3:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => const AccountScreen(selectedIndex: 3)),
+              builder: (context) =>
+              const AccountScreen(selectedIndex: 3)),
         );
         break;
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -124,9 +124,8 @@ Stack Trace: $stackTrace
     debugPrint('🔍 Llamando a: $url');
 
     try {
-      // ✅ Asegúrate de pasar el token en los headers
       http.Response response =
-          await http.get(Uri.parse(url), headers: await _getHeaders());
+      await http.get(Uri.parse(url), headers: await _getHeaders());
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> jsonResponse = json.decode(response.body);
@@ -135,8 +134,7 @@ Stack Trace: $stackTrace
             .map((model) => Location.fromDTO(LocationModel.fromJson(model)))
             .toList();
 
-        debugPrint(
-            '📦 ${locations.length} ubicaciones recibidas para tripId=$tripId');
+        debugPrint('📦 ${locations.length} ubicaciones recibidas para tripId=$tripId');
 
         for (var loc in locations) {
           debugPrint('📍 ${loc.latitude}, ${loc.longitude}');
@@ -153,6 +151,7 @@ Stack Trace: $stackTrace
       return [];
     }
   }
+
 
   Future<Map<String, dynamic>> getCurrentVehicleLocation(int studentId) async {
     final url =

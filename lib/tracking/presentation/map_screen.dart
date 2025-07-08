@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
@@ -9,11 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/home_driver_screen.dart';
 import '../../notifications/presentation/notification_screen.dart';
 import '../../profiles/presentation/account_screen.dart';
+import '../application/services/trip_service.dart';
 import '../infrastructure/data_sources/trip_provider.dart';
 
 class MapScreen extends StatefulWidget {
+  final int driverId;
   final int selectedIndex;
-  const MapScreen({super.key, this.selectedIndex = 1});
+  const MapScreen({super.key, required this.driverId, this.selectedIndex = 1});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -32,17 +35,20 @@ class _MapScreenState extends State<MapScreen> {
   String _destinationText = '';
   String _distance = '-- km';
   int _selectedIndex = 1;
-  Timer? _refreshTimer;
+  Timer? _locationUpdateTimer;
   bool _autoRefresh = false;
   BitmapDescriptor? _vehicleIcon;
   LatLng? _currentVehiclePosition;
+  LatLng? _previousVehiclePosition;
   double? _currentSpeed;
+  double _currentBearing = 0;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.selectedIndex;
     _loadCustomMarker();
+    _startLocationUpdates();
   }
 
   @override
@@ -54,21 +60,28 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void dispose() {
-    _refreshTimer?.cancel();
+    _locationUpdateTimer?.cancel();
+    _mapController?.dispose();
     super.dispose();
   }
 
   Future<void> _loadCustomMarker() async {
-    _vehicleIcon = await BitmapDescriptor.fromAssetImage(
-      const ImageConfiguration(size: Size(48, 48)),
-      'assets/icons/bus_marker_2.png', // Replace with your asset
-    );
+    try {
+      _vehicleIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(48, 48)),
+        'assets/icons/bus_marker_2.png',
+      );
+      debugPrint('✅ Vehicle icon loaded successfully');
+    } catch (e) {
+      debugPrint('❌ Failed to load vehicle icon: $e');
+    }
   }
+
 
   Future<void> _loadRoute() async {
     setState(() => _isLoading = true);
 
-    final driverId = _tripProvider.getCurrentTrip(1)?.driverId ?? 1;
+    final driverId = widget.driverId;
     final trip = _tripProvider.getCurrentTrip(driverId);
 
     _originText = trip?.originAddress ?? '';
@@ -84,12 +97,18 @@ class _MapScreenState extends State<MapScreen> {
       final originLocations = await locationFromAddress(_originText);
       final destinationLocations = await locationFromAddress(_destinationText);
 
-      _originLatLng = LatLng(originLocations.first.latitude, originLocations.first.longitude);
-      _destinationLatLng = LatLng(destinationLocations.first.latitude, destinationLocations.first.longitude);
+      _originLatLng = LatLng(
+        originLocations.first.latitude,
+        originLocations.first.longitude,
+      );
+      _destinationLatLng = LatLng(
+        destinationLocations.first.latitude,
+        destinationLocations.first.longitude,
+      );
 
       _updateMarkers();
       await _fetchRoute();
-      await _updateVehicleLocation();
+      await _fetchVehicleLocation();
 
       _mapController?.animateCamera(
         CameraUpdate.newLatLngBounds(
@@ -102,6 +121,73 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     setState(() => _isLoading = false);
+  }
+
+  void _startLocationUpdates() {
+    _locationUpdateTimer?.cancel();
+    _locationUpdateTimer = Timer.periodic(
+      Duration(seconds: _autoRefresh ? 3 : 10),
+          (_) => _fetchVehicleLocation(),
+    );
+  }
+
+  Future<void> _fetchVehicleLocation() async {
+    try {
+      final tripId = _tripProvider.getCurrentTripId(widget.driverId);
+      debugPrint('📌 Trip ID: $tripId');
+      final isStarted = _tripProvider.isTripStarted(widget.driverId);
+      debugPrint('🚦 Is trip started? $isStarted');
+
+      if (tripId == null || !isStarted) {
+        debugPrint('⚠️ Trip ID null or trip not started. Aborting location fetch.');
+        return;
+      }
+
+      final locations = await TripService().getTripLocations(tripId);
+      debugPrint('📍 Fetched Locations: $locations');
+
+      if (locations.isNotEmpty) {
+        final latestLocation = locations.last;
+        debugPrint('✅ Latest Location -> lat: ${latestLocation.latitude}, lng: ${latestLocation.longitude}, speed: ${latestLocation.speed}');
+
+        setState(() {
+          _previousVehiclePosition = _currentVehiclePosition;
+          _currentVehiclePosition = LatLng(
+            latestLocation.latitude,
+            latestLocation.longitude,
+          );
+          _currentSpeed = latestLocation.speed ?? 0.0;
+
+          if (_previousVehiclePosition != null) {
+            _currentBearing = _calculateBearing(
+              _previousVehiclePosition!,
+              _currentVehiclePosition!,
+            );
+          }
+          debugPrint('🧭 New Bearing: $_currentBearing');
+        });
+
+        _updateMarkers();
+      } else {
+        debugPrint('⚠️ No locations returned for trip.');
+      }
+    } catch (e) {
+      debugPrint('❌ Error fetching vehicle location: $e');
+    }
+  }
+
+
+  double _calculateBearing(LatLng from, LatLng to) {
+    final lat1 = from.latitude * math.pi / 180;
+    final lon1 = from.longitude * math.pi / 180;
+    final lat2 = to.latitude * math.pi / 180;
+    final lon2 = to.longitude * math.pi / 180;
+
+    final y = math.sin(lon2 - lon1) * math.cos(lat2);
+    final x = math.cos(lat1) * math.sin(lat2) -
+        math.sin(lat1) * math.cos(lat2) * math.cos(lon2 - lon1);
+
+    return (math.atan2(y, x) * 180 / math.pi + 360) % 360;
   }
 
   LatLngBounds _calculateBounds() {
@@ -129,26 +215,6 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Future<void> _updateVehicleLocation() async {
-    try {
-      if (_originLatLng != null && _destinationLatLng != null) {
-        final driverId = _tripProvider.getCurrentTrip(1)?.driverId ?? 1;
-        if (_tripProvider.isTripStarted(driverId)) {
-          setState(() {
-            _currentVehiclePosition = LatLng(
-              _originLatLng!.latitude + (_destinationLatLng!.latitude - _originLatLng!.latitude) * 0.3,
-              _originLatLng!.longitude + (_destinationLatLng!.longitude - _originLatLng!.longitude) * 0.3,
-            );
-            _currentSpeed = 45.0;
-          });
-          _updateMarkers();
-        }
-      }
-    } catch (e) {
-      debugPrint('Error updating vehicle location: $e');
-    }
-  }
-
   void _updateMarkers() {
     _markers.clear();
 
@@ -156,7 +222,6 @@ class _MapScreenState extends State<MapScreen> {
       _markers.add(Marker(
         markerId: const MarkerId('origin'),
         position: _originLatLng!,
-        infoWindow: const InfoWindow(title: 'Origen'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
       ));
     }
@@ -165,24 +230,30 @@ class _MapScreenState extends State<MapScreen> {
       _markers.add(Marker(
         markerId: const MarkerId('destination'),
         position: _destinationLatLng!,
-        infoWindow: const InfoWindow(title: 'Destino'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       ));
     }
 
-    if (_currentVehiclePosition != null && _vehicleIcon != null) {
+    if (_currentVehiclePosition != null) {
+      debugPrint('🚗 Adding vehicle marker at $_currentVehiclePosition, speed: $_currentSpeed, bearing: $_currentBearing');
+
       _markers.add(Marker(
         markerId: const MarkerId('vehicle'),
         position: _currentVehiclePosition!,
         infoWindow: InfoWindow(
           title: 'Vehículo',
-          snippet: 'Velocidad: ${_currentSpeed?.toStringAsFixed(1) ?? '--'} km/h',
+          snippet: _currentSpeed != null
+              ? 'Velocidad: ${_currentSpeed!.toStringAsFixed(1)} km/h'
+              : 'Velocidad: -- km/h',
         ),
-        icon: _vehicleIcon!,
-        rotation: 45.0,
+        icon: _vehicleIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        rotation: _currentBearing.isNaN ? 0 : _currentBearing,
       ));
+    } else {
+      debugPrint('⚠️ No vehicle position to show.');
     }
   }
+
 
   Future<void> _fetchRoute() async {
     if (_originLatLng == null || _destinationLatLng == null) return;
@@ -252,13 +323,7 @@ class _MapScreenState extends State<MapScreen> {
   void _toggleAutoRefresh() {
     setState(() {
       _autoRefresh = !_autoRefresh;
-      if (_autoRefresh) {
-        _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-          _updateVehicleLocation();
-        });
-      } else {
-        _refreshTimer?.cancel();
-      }
+      _startLocationUpdates();
     });
   }
 
@@ -305,7 +370,6 @@ class _MapScreenState extends State<MapScreen> {
         );
         break;
       case 1:
-      // Already on map screen
         break;
       case 2:
         Navigator.pushReplacement(
@@ -341,7 +405,6 @@ class _MapScreenState extends State<MapScreen> {
       ),
       body: Column(
         children: [
-          // Map Section
           Expanded(
             flex: 2,
             child: Stack(
@@ -360,7 +423,6 @@ class _MapScreenState extends State<MapScreen> {
                   polylines: _polylines,
                   myLocationEnabled: true,
                   compassEnabled: true,
-                  mapToolbarEnabled: false,
                 ),
                 if (!_isLoading)
                   Positioned(
@@ -399,8 +461,6 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
-
-          // Info Section
           Expanded(
             flex: 1,
             child: Container(
@@ -419,7 +479,6 @@ class _MapScreenState extends State<MapScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // Trip Information
                     Row(
                       children: [
                         Expanded(
@@ -446,10 +505,10 @@ class _MapScreenState extends State<MapScreen> {
                       children: [
                         Expanded(
                           child: _buildInfoCard(
-                            _status == 'En Route' ? Icons.directions_car : Icons.access_time,
+                            _status == 'En camino' ? Icons.directions_car : Icons.access_time,
                             'Status',
                             _status,
-                            _status == 'En Route' ? Colors.green : Colors.orange,
+                            _status == 'En camino' ? Colors.green : Colors.orange,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -463,8 +522,6 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                       ],
                     ),
-
-                    // Controls
                     const SizedBox(height: 16),
                     Row(
                       children: [
