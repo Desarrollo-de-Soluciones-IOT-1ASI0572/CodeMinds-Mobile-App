@@ -79,7 +79,7 @@ class StudentService {
     if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.created) {
       List<dynamic> jsonResponse = jsonDecode(response.body);
       if (jsonResponse.isNotEmpty) {
-        return Student.fromJson(jsonResponse[0]); // Devuelve el primer estudiante de la lista
+        return Student.fromJson(jsonResponse[0]);
       } else {
         throw Exception('Respuesta vacía del servidor');
       }

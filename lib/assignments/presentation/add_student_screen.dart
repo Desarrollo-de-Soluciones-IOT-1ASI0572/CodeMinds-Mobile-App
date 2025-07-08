@@ -46,7 +46,6 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
   }
 
   // Método para crear el estudiante
-  // Método para crear el estudiante
   Future<void> _createStudent() async {
     final name = _nameController.text.trim();
     final lastName = _lastNameController.text.trim();
@@ -64,10 +63,16 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     }
 
     try {
-      const parentProfileId = 3; // Esto debería venir del usuario logueado
+      final prefs = await SharedPreferences.getInstance();
+      final int? parentProfileId = prefs.getInt('user_id');
+
+      if (parentProfileId == null) {
+        _showError('No se encontró el perfil del padre');
+        return;
+      }
 
       final student = Student(
-        id: 0, // El ID será asignado por el backend
+        id: 0,
         name: name,
         lastName: lastName,
         homeAddress: homeAddress,
@@ -80,12 +85,14 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
       await _studentService.postStudent(student, parentProfileId);
 
       if (mounted) {
-        Navigator.pop(context, true); // Retorna 'true' para indicar éxito
+        Navigator.pop(context, true);
       }
     } catch (e) {
       _showError('Error al crear el estudiante: $e');
     }
   }
+
+
 
 
   void _showError(String message) {
@@ -148,12 +155,13 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                   ),
                   onPressed: () {
                     setState(() {
-                      _imagePath = 'assets/images/circle-user.png';
+                      _imagePath = 'https://content.elmueble.com/medio/2024/03/24/nombres-de-nina-con-significado-poderoso_19b192f7_240324191926_900x900.jpg';
                     });
                   },
                   child: const Text('Select Photo', style: TextStyle(color: Colors.white)),
                 ),
               ),
+
               const SizedBox(height: 24),
 
               // Botones "Save" y "Cancel"
