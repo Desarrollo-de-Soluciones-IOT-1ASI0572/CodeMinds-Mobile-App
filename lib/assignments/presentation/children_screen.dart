@@ -92,7 +92,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                const NotificationScreen(selectedIndex: 2)));
+                    const NotificationScreen(selectedIndex: 2)));
         break;
       case 3:
         Navigator.pushReplacement(
@@ -136,7 +136,8 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                   ),
-                  onPressed: _onAddStudent, // Llamada para agregar un nuevo estudiante
+                  onPressed:
+                      _onAddStudent, // Llamada para agregar un nuevo estudiante
                   child: const Text(
                     'Add Student',
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -148,14 +149,14 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : _students.isEmpty
-                    ? const Center(child: Text('No students found.'))
-                    : ListView.builder(
-                  itemCount: _students.length,
-                  itemBuilder: (context, index) {
-                    final student = _students[index];
-                    return _buildChildTile(student, index);
-                  },
-                ),
+                        ? const Center(child: Text('No students found.'))
+                        : ListView.builder(
+                            itemCount: _students.length,
+                            itemBuilder: (context, index) {
+                              final student = _students[index];
+                              return _buildChildTile(student, index);
+                            },
+                          ),
               ),
             ],
           ),
@@ -182,14 +183,14 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
               backgroundImage: student.studentPhotoUrl.isNotEmpty
                   ? NetworkImage(student.studentPhotoUrl)
                   : const AssetImage('assets/images/circle-user.png')
-              as ImageProvider,
+                      as ImageProvider,
             ),
             const SizedBox(width: 12.0),
             Expanded(
               child: Text(
                 '${student.name} ${student.lastName}',
                 style:
-                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
             IconButton(
@@ -271,4 +272,3 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     );
   }
 }
-

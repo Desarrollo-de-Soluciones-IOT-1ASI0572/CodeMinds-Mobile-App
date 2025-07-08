@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:codeminds_mobile_application/profiles/presentation/register_screen.dart';
 import 'package:codeminds_mobile_application/shared/home_driver_screen.dart';
 import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
@@ -203,8 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RoleSelectionScreen(),
+                                  builder: (context) => const RegisterScreen(),
                                 ),
                               );
                             },

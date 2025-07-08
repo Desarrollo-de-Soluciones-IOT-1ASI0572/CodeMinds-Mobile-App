@@ -54,7 +54,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
       if (userId != null) {
-        final children = await StudentService().getStudentsByParentUserId(userId);
+        final children =
+            await StudentService().getStudentsByParentUserId(userId);
         setState(() {
           _children = children;
           _selectedChild = children.isNotEmpty ? children.first : null;
@@ -75,18 +76,15 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
     setState(() => _isTrackingLoading = true);
     try {
-      final locationData = await TripService().getCurrentVehicleLocation(_selectedChild!.id);
-      final newPosition = LatLng(
-          locationData['location']['latitude'],
-          locationData['location']['longitude']
-      );
+      final locationData =
+          await TripService().getCurrentVehicleLocation(_selectedChild!.id);
+      final newPosition = LatLng(locationData['location']['latitude'],
+          locationData['location']['longitude']);
 
       // Convertir coordenadas a dirección
       try {
         final placemarks = await placemarkFromCoordinates(
-            newPosition.latitude,
-            newPosition.longitude
-        );
+            newPosition.latitude, newPosition.longitude);
 
         final place = placemarks.first;
         setState(() {
@@ -99,7 +97,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
         });
       } catch (e) {
         setState(() {
-          _currentAddress = "Coordenadas: ${newPosition.latitude.toStringAsFixed(5)}, "
+          _currentAddress =
+              "Coordenadas: ${newPosition.latitude.toStringAsFixed(5)}, "
               "${newPosition.longitude.toStringAsFixed(5)}";
         });
       }
@@ -113,7 +112,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
           Marker(
             markerId: const MarkerId('vehicle'),
             position: newPosition,
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+            icon:
+                BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
             infoWindow: InfoWindow(
               title: 'Vehículo escolar',
               snippet: _currentAddress, // Mostrar dirección en el marcador
@@ -136,7 +136,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
       });
     }
   }
-
 
   void _toggleAutoRefresh() {
     setState(() {
@@ -190,19 +189,22 @@ class _TrackingScreenState extends State<TrackingScreen> {
       case 1:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const TrackingScreen(selectedIndex: 1)),
+          MaterialPageRoute(
+              builder: (context) => const TrackingScreen(selectedIndex: 1)),
         );
         break;
       case 2:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const NotificationScreen(selectedIndex: 2)),
+          MaterialPageRoute(
+              builder: (context) => const NotificationScreen(selectedIndex: 2)),
         );
         break;
       case 3:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const AccountScreen(selectedIndex: 3)),
+          MaterialPageRoute(
+              builder: (context) => const AccountScreen(selectedIndex: 3)),
         );
         break;
     }
@@ -223,9 +225,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
             Text(
               title,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
             const SizedBox(height: 8),
             content,
@@ -302,141 +304,147 @@ class _TrackingScreenState extends State<TrackingScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _children.isEmpty
-                  ? Center(
-                child: Text(
-                  'No se encontraron hijos',
-                  style: theme.textTheme.bodyLarge,
-                ),
-              )
-                  : Column(
-                children: [
-                  // Student Selection
-                  _buildInfoCard(
-                    'Student',
-                    DropdownButtonFormField<Student>(
-                      value: _selectedChild,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      onChanged: (Student? newValue) {
-                        setState(() => _selectedChild = newValue);
-                        _updateVehicleLocation();
-                      },
-                      items: _children.map<DropdownMenuItem<Student>>((child) {
-                        return DropdownMenuItem<Student>(
-                          value: child,
+                      ? Center(
                           child: Text(
-                            '${child.name} ${child.lastName}',
-                            overflow: TextOverflow.ellipsis,
+                            'No se encontraron hijos',
+                            style: theme.textTheme.bodyLarge,
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  if (_selectedChild != null) ...[
-                    // Address Info
-                    _buildInfoCard(
-                      'Current Location',
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_pin,
-                            size: 20,
-                            color: colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _currentAddress,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // School Info
-                    _buildInfoCard(
-                      'School',
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.school,
-                            size: 20,
-                            color: colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(_selectedChild!.schoolAddress),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Status and Speed
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildInfoCard(
-                            'Status',
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 12,
-                                  color: _trackingStatus == "En camino"
-                                      ? Colors.green
-                                      : Colors.grey,
+                        )
+                      : Column(
+                          children: [
+                            // Student Selection
+                            _buildInfoCard(
+                              'Student',
+                              DropdownButtonFormField<Student>(
+                                value: _selectedChild,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                 ),
-                                const SizedBox(width: 8),
-                                Text(_trackingStatus),
-                              ],
+                                onChanged: (Student? newValue) {
+                                  setState(() => _selectedChild = newValue);
+                                  _updateVehicleLocation();
+                                },
+                                items: _children
+                                    .map<DropdownMenuItem<Student>>((child) {
+                                  return DropdownMenuItem<Student>(
+                                    value: child,
+                                    child: Text(
+                                      '${child.name} ${child.lastName}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             ),
-                          ),
+
+                            if (_selectedChild != null) ...[
+                              // Address Info
+                              _buildInfoCard(
+                                'Current Location',
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_pin,
+                                      size: 20,
+                                      color: colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _currentAddress,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // School Info
+                              _buildInfoCard(
+                                'School',
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.school,
+                                      size: 20,
+                                      color: colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child:
+                                          Text(_selectedChild!.schoolAddress),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Status and Speed
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildInfoCard(
+                                      'Status',
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.circle,
+                                            size: 12,
+                                            color:
+                                                _trackingStatus == "En camino"
+                                                    ? Colors.green
+                                                    : Colors.grey,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(_trackingStatus),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: _buildInfoCard(
+                                      'Speed',
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.speed,
+                                            size: 20,
+                                            color: colorScheme.primary,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            _isTrackingLoading
+                                                ? 'Cargando...'
+                                                : '${_currentSpeed?.toStringAsFixed(1) ?? '--'} km/h',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              // Auto Refresh Toggle
+                              SwitchListTile(
+                                title: const Text('Auto Update'),
+                                value: _autoRefresh,
+                                onChanged: (value) => _toggleAutoRefresh(),
+                                secondary: Icon(
+                                  Icons.autorenew,
+                                  color: _autoRefresh
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildInfoCard(
-                            'Speed',
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.speed,
-                                  size: 20,
-                                  color: colorScheme.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _isTrackingLoading
-                                      ? 'Cargando...'
-                                      : '${_currentSpeed?.toStringAsFixed(1) ?? '--'} km/h',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Auto Refresh Toggle
-                    SwitchListTile(
-                      title: const Text('Auto Update'),
-                      value: _autoRefresh,
-                      onChanged: (value) => _toggleAutoRefresh(),
-                      secondary: Icon(
-                        Icons.autorenew,
-                        color: _autoRefresh
-                            ? colorScheme.primary
-                            : colorScheme.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
             ),
           ),
         ],

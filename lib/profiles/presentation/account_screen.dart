@@ -82,7 +82,8 @@ class _AccountScreenState extends State<AccountScreen> {
           final driverId = prefs.getInt('user_id');
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => MapScreen(driverId: driverId!)),
+            MaterialPageRoute(
+                builder: (context) => MapScreen(driverId: driverId!)),
           );
         }
         break;
@@ -102,7 +103,6 @@ class _AccountScreenState extends State<AccountScreen> {
         break;
     }
   }
-
 
   @override
   void initState() {
@@ -182,19 +182,6 @@ class _AccountScreenState extends State<AccountScreen> {
                             fontSize: 18, color: Colors.black54),
                       ),
                       const SizedBox(height: 16.0),
-                      _buildButton(
-                          'Update Information', Icons.edit, Colors.blue, () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const AccountUpdateScreen()),
-                        );
-                      }),
-                      const SizedBox(height: 12.0),
-                      _buildButton(
-                          'Delete Account', Icons.delete, Colors.red, () {}),
-                      const SizedBox(height: 12.0),
                       _buildButton('Log Out', Icons.logout, Colors.black, () {
                         Navigator.pushAndRemoveUntil(
                           context,

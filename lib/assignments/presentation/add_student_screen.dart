@@ -16,7 +16,8 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _schoolAddressController = TextEditingController();
+  final TextEditingController _schoolAddressController =
+      TextEditingController();
   String? _imagePath;
   int? _selectedDriverId;
   List<ProfileModel> _drivers = [];
@@ -31,7 +32,8 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
 
   Future<void> _fetchDrivers() async {
     try {
-      List<ProfileModel> drivers = await _profileService.fetchProfilesByRole('ROLE_DRIVER');
+      List<ProfileModel> drivers =
+          await _profileService.fetchProfilesByRole('ROLE_DRIVER');
       setState(() {
         _drivers = drivers;
       });
@@ -42,7 +44,8 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token'); // Asegúrate de que el token esté guardado como 'jwt_token'
+    return prefs.getString(
+        'jwt_token'); // Asegúrate de que el token esté guardado como 'jwt_token'
   }
 
   // Método para crear el estudiante
@@ -52,7 +55,10 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     final homeAddress = _addressController.text.trim();
     final schoolAddress = _schoolAddressController.text.trim();
 
-    if (name.isEmpty || lastName.isEmpty || homeAddress.isEmpty || schoolAddress.isEmpty) {
+    if (name.isEmpty ||
+        lastName.isEmpty ||
+        homeAddress.isEmpty ||
+        schoolAddress.isEmpty) {
       _showError('Por favor, completa todos los campos');
       return;
     }
@@ -92,9 +98,6 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     }
   }
 
-
-
-
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
@@ -128,21 +131,22 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
               const Text('Select Driver', style: TextStyle(fontSize: 16)),
               _drivers.isNotEmpty
                   ? DropdownButton<int>(
-                isExpanded: true,
-                hint: const Text('Select Driver'),
-                value: _selectedDriverId,
-                onChanged: (int? newValue) {
-                  setState(() {
-                    _selectedDriverId = newValue;
-                  });
-                },
-                items: _drivers.map<DropdownMenuItem<int>>((ProfileModel driver) {
-                  return DropdownMenuItem<int>(
-                    value: driver.id,
-                    child: Text(driver.fullName),
-                  );
-                }).toList(),
-              )
+                      isExpanded: true,
+                      hint: const Text('Select Driver'),
+                      value: _selectedDriverId,
+                      onChanged: (int? newValue) {
+                        setState(() {
+                          _selectedDriverId = newValue;
+                        });
+                      },
+                      items: _drivers
+                          .map<DropdownMenuItem<int>>((ProfileModel driver) {
+                        return DropdownMenuItem<int>(
+                          value: driver.id,
+                          child: Text(driver.fullName),
+                        );
+                      }).toList(),
+                    )
                   : const Center(child: CircularProgressIndicator()),
               const SizedBox(height: 24),
 
@@ -151,14 +155,17 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 32),
                   ),
                   onPressed: () {
                     setState(() {
-                      _imagePath = 'https://content.elmueble.com/medio/2024/03/24/nombres-de-nina-con-significado-poderoso_19b192f7_240324191926_900x900.jpg';
+                      _imagePath =
+                          'https://content.elmueble.com/medio/2024/03/24/nombres-de-nina-con-significado-poderoso_19b192f7_240324191926_900x900.jpg';
                     });
                   },
-                  child: const Text('Select Photo', style: TextStyle(color: Colors.white)),
+                  child: const Text('Select Photo',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
 
@@ -184,7 +191,8 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
         labelText: label,
         filled: true,
         fillColor: Colors.grey[200],
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
       style: const TextStyle(fontSize: 16),
@@ -198,7 +206,8 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 14),
           backgroundColor: color,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onPressed: onPressed,
         child: Text(
