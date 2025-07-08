@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:codeminds_mobile_application/shared/home_parent_screen.dart';
 import 'package:codeminds_mobile_application/notifications/presentation/notification_screen.dart';
 import 'package:codeminds_mobile_application/profiles/presentation/account_screen.dart';
-import 'package:codeminds_mobile_application/profiles/presentation/add_student_screen.dart';
+import 'package:codeminds_mobile_application/assignments/presentation/add_student_screen.dart';
 import 'package:codeminds_mobile_application/shared/widgets/custom_bottom_navigation_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,6 +56,19 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     }
   }
 
+  // Actualiza la lista de estudiantes cuando se regresa de AddStudentScreen
+  Future<void> _onAddStudent() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddStudentScreen()),
+    );
+
+    if (result == true) {
+      // Si el estudiante fue creado exitosamente, recarga la lista
+      _loadStudents();
+    }
+  }
+
   void _onItemTapped(int index) {
     if (_selectedIndex == index) {
       Navigator.of(context).popUntil((route) => route.isFirst);
@@ -79,7 +92,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    const NotificationScreen(selectedIndex: 2)));
+                const NotificationScreen(selectedIndex: 2)));
         break;
       case 3:
         Navigator.pushReplacement(
@@ -123,13 +136,7 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AddStudentScreen()),
-                    );
-                  },
+                  onPressed: _onAddStudent, // Llamada para agregar un nuevo estudiante
                   child: const Text(
                     'Add Student',
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -141,14 +148,14 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : _students.isEmpty
-                        ? const Center(child: Text('No students found.'))
-                        : ListView.builder(
-                            itemCount: _students.length,
-                            itemBuilder: (context, index) {
-                              final student = _students[index];
-                              return _buildChildTile(student, index);
-                            },
-                          ),
+                    ? const Center(child: Text('No students found.'))
+                    : ListView.builder(
+                  itemCount: _students.length,
+                  itemBuilder: (context, index) {
+                    final student = _students[index];
+                    return _buildChildTile(student, index);
+                  },
+                ),
               ),
             ],
           ),
@@ -175,14 +182,14 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
               backgroundImage: student.studentPhotoUrl.isNotEmpty
                   ? NetworkImage(student.studentPhotoUrl)
                   : const AssetImage('assets/images/circle-user.png')
-                      as ImageProvider,
+              as ImageProvider,
             ),
             const SizedBox(width: 12.0),
             Expanded(
               child: Text(
                 '${student.name} ${student.lastName}',
                 style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
             IconButton(
@@ -264,3 +271,4 @@ class _ChildrenScreenState extends State<ChildrenScreen> {
     );
   }
 }
+

@@ -52,9 +52,19 @@ class StudentService {
     }
   }
 
-  Future<Student> postStudent(Student student, int parentId) async {
-    String? token = await getToken();
+  Future<Student?> postStudent(Student student, int parentId) async {
+    final token = await getToken();
     if (token == null) throw Exception('Token no encontrado');
+
+    final requestBody = {
+      "name": student.name,
+      "lastName": student.lastName,
+      "homeAddress": student.homeAddress,
+      "schoolAddress": student.schoolAddress,
+      "studentPhotoUrl": student.studentPhotoUrl,
+      "parentProfileId": parentId,
+      "driverId": student.driverId,
+    };
 
     final url = Uri.parse('${AppConstants.baseUrl}/students');
     final response = await http.post(
@@ -63,21 +73,22 @@ class StudentService {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
-      body: jsonEncode({
-        "name": student.name,
-        "lastName": student.lastName,
-        "homeAddress": student.homeAddress,
-        "schoolAddress": student.schoolAddress,
-        "studentPhotoUrl": student.studentPhotoUrl,
-        "parentProfileId": parentId
-      }),
+      body: jsonEncode(requestBody),
     );
 
-    if (response.statusCode == HttpStatus.ok ||
-        response.statusCode == HttpStatus.created) {
-      return Student.fromJson(jsonDecode(response.body));
+    if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.created) {
+      List<dynamic> jsonResponse = jsonDecode(response.body);
+      if (jsonResponse.isNotEmpty) {
+        return Student.fromJson(jsonResponse[0]); // Devuelve el primer estudiante de la lista
+      } else {
+        throw Exception('Respuesta vacía del servidor');
+      }
     } else {
-      throw Exception('Error al crear el estudiante');
+      print('❌ Error al crear estudiante');
+      print('Código de estado: ${response.statusCode}');
+      print('Respuesta del backend: ${response.body}');
+      throw Exception(
+          'Error al crear el estudiante: ${response.statusCode} - ${response.body}');
     }
   }
 
