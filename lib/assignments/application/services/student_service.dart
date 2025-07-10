@@ -92,6 +92,7 @@ class StudentService {
     }
   }
 
+
   Future<List<Student>> getStudentsByParentUserId(int parentUserId) async {
     try {
       String? token = await getToken();
@@ -133,4 +134,41 @@ class StudentService {
       rethrow;
     }
   }
+  Future<List<Student>> getStudentsByParentUserIdPaged(int parentUserId, int offset, int limit) async {
+    try {
+      String? token = await getToken();
+      if (token == null) {
+        throw Exception('Token no encontrado');
+      }
+
+      // Si tu API no soporta paginación por query, puedes simularlo en cliente.
+      final url = Uri.parse('${AppConstants.baseUrl}/students');
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> jsonList = jsonDecode(response.body);
+
+        final students = jsonList
+            .map((e) => Student.fromJson(e))
+            .where((student) => student.parentProfileId == parentUserId)
+            .skip(offset)
+            .take(limit)
+            .toList();
+
+        return students;
+      } else {
+        throw Exception('Error al obtener los estudiantes');
+      }
+    } catch (e) {
+      print('❌ Error en paginación: $e');
+      rethrow;
+    }
+  }
+
 }
