@@ -44,7 +44,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           _activeTripId = trip.id;
         });
 
-        // 🔥 Siempre usa getTripStudents para estado real.
+        // Always use getTripStudents for real-time status.
         await _loadStudents();
       } else {
         setState(() => _hasActiveTrip = false);
@@ -56,7 +56,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
-  /// ✅ Siempre obtiene boardedAt y exitedAt actualizados.
   Future<void> _loadStudents() async {
     if (_activeTripId == null) return;
     setState(() => _isLoading = true);
@@ -77,7 +76,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (!_hasActiveTrip) {
       return const Center(
         child: Text(
-          'No tienes viajes activos',
+          'No active trips',
           style: TextStyle(fontSize: 18),
         ),
       );
@@ -85,7 +84,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (students.isEmpty) {
       return const Center(
         child: Text(
-          'No hay estudiantes en este viaje',
+          'No students in this trip',
           style: TextStyle(fontSize: 18),
         ),
       );
@@ -114,7 +113,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('📍 ${student['homeAddress']}'),
-            Text('Estado: ${status['text']}',
+            Text('Status: ${status['text']}',
                 style: TextStyle(color: status['color'])),
             if (status['time'] != null) Text('🕒 ${status['time']}'),
           ],
@@ -130,21 +129,21 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Map<String, dynamic> _determineStatus(Map<String, dynamic> student) {
     if (student['exitedAt'] != null) {
       return {
-        'text': 'Finalizado',
+        'text': 'Completed',
         'color': Colors.blue,
         'time': _formatTime(student['exitedAt']),
         'icon': Icons.check_circle
       };
     } else if (student['boardedAt'] != null) {
       return {
-        'text': 'A bordo',
+        'text': 'On board',
         'color': Colors.green,
         'time': _formatTime(student['boardedAt']),
         'icon': Icons.directions_bus
       };
     } else {
       return {
-        'text': 'Pendiente',
+        'text': 'Pending',
         'color': Colors.orange,
         'time': null,
         'icon': Icons.pending
@@ -215,7 +214,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Control de Asistencia'),
+        title: const Text('Attendance Control'),
         actions: [
           if (_hasActiveTrip)
             IconButton(
