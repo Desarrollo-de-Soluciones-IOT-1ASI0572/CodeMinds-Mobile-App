@@ -306,7 +306,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   : _children.isEmpty
                       ? Center(
                           child: Text(
-                            'No se encontraron hijos',
+                            'No children found.',
                             style: theme.textTheme.bodyLarge,
                           ),
                         )
