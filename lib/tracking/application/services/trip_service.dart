@@ -353,4 +353,33 @@ Stack Trace: $stackTrace
       return false;
     }
   }
+
+  Future<bool> activateEmergency(int tripId) async {
+    final url = '${AppConstants.baseUrl}${AppConstants.tripsEndpoint}/$tripId/emergency';
+    debugPrint('🚨 Llamando a: $url');
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+      );
+
+      debugPrint('🔔 Respuesta Emergency: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.accepted) {
+        debugPrint('✅ Emergencia activada para tripId=$tripId');
+        return true;
+      } else {
+        debugPrint('❌ Error al activar emergencia. Código: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ Excepción al activar emergencia: $e');
+      return false;
+    }
+  }
+
+
+
 }
