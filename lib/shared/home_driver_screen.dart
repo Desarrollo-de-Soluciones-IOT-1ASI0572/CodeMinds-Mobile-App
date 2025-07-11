@@ -277,7 +277,7 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Emergency Button
+                if (_shouldShowTripControls() && isTripStarted)
                 Card(
                   elevation: 2,
                   shape: RoundedRectangleBorder(
@@ -285,9 +285,44 @@ class _HomeDriverScreenState extends State<HomeDriverScreen> {
                   ),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      // Handle emergency button press
+                    onTap: () async {
+                      if (_currentDriverId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("No driver ID found."),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final tripId = _tripProvider.getCurrentTripId(_currentDriverId!);
+                      if (tripId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("No active trip found."),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final success = await TripService().activateEmergency(tripId);
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("🚨 Emergency activated!"),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("❌ Failed to activate emergency."),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
                     },
+
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
