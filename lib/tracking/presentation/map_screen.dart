@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
@@ -327,32 +328,73 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _showEmergencyDialog() {
-    showDialog(
+  void _showEmergencyDialog() async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar Emergencia'),
-        content: const Text('¿Estás seguro de que deseas activar la alerta de emergencia?'),
+        title: const Text("Activate Emergency?"),
+        content: const Text("This will notify authorities and parents immediately and end the trip. Are you sure?"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Alerta de emergencia activada'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-            child: const Text('Confirmar', style: TextStyle(color: Colors.red)),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Confirmar',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
-    );
+    ) ?? false;
+
+    if (!confirmed) return;
+
+    final tripId = _tripProvider.getCurrentTripId(widget.driverId);
+    if (tripId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No active trip found.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      HapticFeedback.heavyImpact();
+      final success = await TripService().activateEmergency(tripId);
+
+      if (success) {
+        // ✅ También termina el viaje localmente:
+        _tripProvider.endTrip(widget.driverId);
+        _tripProvider.resetTrip(widget.driverId);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('🚨 Alerta de emergencia activada. Trip terminado.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Error al activar emergencia'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _onNavTap(int index) async {
